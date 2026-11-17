@@ -1,0 +1,515 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Ecobot · Pantalla grande</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700;800&family=Nunito:wght@700;800&display=swap">
+<link rel="stylesheet" href="ecobot-base.css">
+<style>
+/* Pantalla grande: un solo look oscuro de bosque para que las luces del Ecobot brillen en el proyector. Robot gigante a la izquierda, voz y nombre a la derecha, escuadrones abajo. */
+:root{
+  color-scheme:dark;
+  --bg:#0c2117; --bg-2:#123522; --surface:#f7fbf8; --surface-2:#1b4130; --ink:#effaf3; --muted:#a8c9b6; --line:#2c5a42;
+  --heading:#ffffff; --brand:#2f7d50; --brand-2:#3a9461; --brand-ink:#ffffff; --brand-soft:#1f4a33;
+  --led:#33d1b3; --led-off:#1d3a35; --screen:#0a1c1a;
+  --sun:#e3a313; --sun-bg:#3a2f10; --sun-ink:#f6d27a; --sun-line:#f0c95a;
+  --robot:#e6f3e8; --robot-line:#cfe8d6; --robot-body:#b9dcc4; --danger:#e0605f;
+  --f-display:'Poppins', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --f-body:'Nunito', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+}
+html,body{height:100%}
+body{background:radial-gradient(120% 90% at 30% 40%,var(--bg-2),var(--bg) 70%);overflow:hidden;font-size:clamp(16px,1.3vw,24px)}
+.robot .head{stroke:#1e5b3a}.robot .ear,.robot .body{stroke:#1e5b3a}.robot .neck{fill:#1e5b3a}
+.robot .shadow{fill:#000;opacity:.35}
+.stage{height:100%;display:grid;grid-template-rows:auto minmax(0,1fr) auto;padding-left:max(2vw,env(safe-area-inset-left,0px));padding-right:max(2vw,env(safe-area-inset-right,0px));padding-block:1.6vh 2vh;gap:1.4vh}
+.topbar{display:flex;justify-content:space-between;align-items:center;gap:1em}
+.mom{display:flex;gap:.6em;align-items:center;font-family:var(--f-display);font-weight:700;color:var(--muted);font-size:1.05em}
+.mom b{display:grid;place-items:center;width:2em;height:2em;border-radius:50%;background:var(--brand);color:#fff}
+.mom span{color:var(--ink)}
+.tools{display:flex;gap:.6em;align-items:center}
+.tools button{border:1px solid var(--line);background:transparent;color:var(--muted);border-radius:999px;padding:.3em .9em;font-weight:800;cursor:pointer;font-size:.8em}
+.main{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);gap:3vw;align-items:center;min-height:0}
+.main{height:100%}
+#robotHost{align-self:stretch;position:relative;min-height:0}
+#robotHost .robot{position:absolute;inset:3% 0 0;width:100%;height:97%}
+.talk{display:grid;gap:2.4vh;align-content:center;min-width:0}
+.hello{font-family:var(--f-display);color:var(--muted);font-weight:700;font-size:1.3em;letter-spacing:.04em}
+.name{font-family:var(--f-display);font-weight:800;font-size:clamp(3rem,7vw,9rem);line-height:.95;color:#fff;overflow-wrap:anywhere;text-shadow:0 0 40px rgba(51,209,179,.25)}
+.nick{font-size:1.25em;color:var(--muted);font-weight:700;min-height:1.4em}
+.big-bubble{position:relative;background:var(--surface);color:#17271e;border-radius:1.2em;padding:1em 1.3em;font-family:var(--f-display);font-weight:700;font-size:clamp(1.5rem,2.8vw,3.4rem);line-height:1.2;text-wrap:balance;min-height:3.2em;display:grid;align-content:center;gap:.25em;opacity:0;transform:translateY(12px) scale(.98);transition:opacity .35s,transform .35s;box-shadow:0 20px 50px rgba(0,0,0,.35)}
+.big-bubble::before{content:"";position:absolute;left:-.55em;top:50%;width:1.2em;height:1.2em;background:var(--surface);transform:translateY(-50%) rotate(45deg);border-radius:.15em}
+.big-bubble.show{opacity:1;transform:none}
+.big-bubble .by{font-family:var(--f-body);font-size:.42em;font-weight:800;letter-spacing:.06em;text-transform:uppercase;display:flex;gap:.4em;align-items:center}
+.big-bubble .by i{width:.9em;height:.9em;border-radius:50%;background:var(--tc)}
+.facelab{display:inline-flex;gap:.5em;align-items:center;background:var(--surface-2);border-radius:999px;padding:.35em 1em;font-weight:800;color:var(--ink);justify-self:start}
+.facelab b{color:var(--led);font-family:var(--f-display)}
+.squads{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:1.2vw}
+.sqd{background:rgba(255,255,255,.06);border:2px solid transparent;border-top:.5em solid var(--tc);border-radius:1em;padding:.6em .9em;display:flex;gap:.7em;align-items:center;min-width:0;transition:transform .3s,background .3s,border-color .3s}
+.sqd svg.ic{width:2.2em;height:2.2em;flex:none;background:#fff;border-radius:.6em;padding:.2em}
+.sqd b{font-family:var(--f-display);font-size:1.05em;display:block;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sqd small{color:var(--muted);font-weight:700;font-size:.8em}
+.sqd .fc{margin-left:auto;width:4.4em;flex:none}
+.sqd .fc svg{width:100%;height:auto;display:block}
+.sqd.flash{transform:translateY(-.6em);background:rgba(255,255,255,.14);border-color:var(--tc)}
+.overlay{position:fixed;inset:0;z-index:20;display:grid;place-items:center;text-align:center;padding:4vw;background:rgba(6,20,13,.88)}
+.overlay .in{display:grid;gap:3vh;justify-items:center;max-width:90vw}
+.cmd{font-family:var(--f-display);font-weight:800;font-size:clamp(2.6rem,7vw,8rem);line-height:1.05;color:#fff;text-wrap:balance}
+.cmd em{font-style:normal;color:var(--led);display:block;font-size:.55em}
+.verdict{font-family:var(--f-display);font-weight:800;font-size:clamp(1.8rem,4vw,4.4rem);border-radius:.5em;padding:.2em .7em}
+.verdict.yes{background:var(--brand);color:#fff}
+.verdict.no{background:var(--sun);color:#2d2000}
+.start h1{font-size:clamp(1.6rem,3.2vw,3.2rem);color:#fff;line-height:1.1}
+.start p{color:var(--muted);font-size:1.2em;max-width:40ch}
+.start #startBtn{font-size:1.4em;padding:.7em 1.6em;border-radius:.7em;background:var(--sun);color:#2d2000;box-shadow:0 10px 30px rgba(242,182,50,.35)}
+
+.momcard{position:fixed;left:50%;top:12vh;transform:translate(-50%,-30px);z-index:15;background:var(--sun);color:#2d2000;font-family:var(--f-display);font-weight:800;font-size:clamp(1.4rem,2.6vw,3rem);padding:.5em 1.2em;border-radius:.6em;opacity:0;transition:opacity .4s,transform .4s;pointer-events:none;text-align:center;box-shadow:0 20px 50px rgba(0,0,0,.4)}
+.momcard.show{opacity:1;transform:translate(-50%,0)}
+.momcard small{display:block;font-size:.5em;font-weight:700}
+.leaves{position:fixed;inset:0;pointer-events:none;z-index:10;overflow:hidden}
+.leaves i{position:absolute;top:-8vh;width:3vw;height:3vw;min-width:22px;min-height:22px;background:#5fbf5a;border-radius:0 100% 0 100%;animation:fall linear forwards;opacity:.95}
+@keyframes fall{to{transform:translate(var(--dx),115vh) rotate(var(--rot))}}
+.offline{position:fixed;right:1vw;bottom:1vh;z-index:30}
+
+#fx{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:0}
+.moon{position:fixed;top:8vh;left:44vw;width:4.6vw;height:4.6vw;min-width:50px;min-height:50px;border-radius:50%;z-index:0;pointer-events:none;background:radial-gradient(circle at 34% 32%,#fffdf0,#f7e9b6 58%,#e6cf86);box-shadow:0 0 40px rgba(255,240,190,.45),0 0 140px rgba(255,240,190,.2)}
+.land{position:fixed;left:0;right:0;bottom:11vh;height:34vh;z-index:0;pointer-events:none}
+.ground{position:fixed;left:0;right:0;bottom:0;height:11.2vh;background:#1e6a3d;z-index:0}
+.stage{position:relative;z-index:1}
+.sqd{background:rgba(8,32,21,.62);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
+.heart{width:3vw;height:3vw;min-width:30px;min-height:30px}
+.vpick{display:grid;gap:8px;width:min(520px,90vw);text-align:left}
+.vpick label{font-weight:800;color:#cfe6d6}
+.vrow{display:flex;gap:8px}
+.vrow select{flex:1;min-width:0;background:#fff;color:#17271e;border:0;border-radius:12px;padding:10px 12px;font-size:1rem}
+.vpick small{color:var(--muted);font-weight:700}
+.calmchk{display:flex;gap:8px;align-items:center;color:var(--muted);font-weight:700;font-size:.9rem;cursor:pointer}
+.calmchk input{width:18px;height:18px;accent-color:var(--led)}
+.btn.ghosty{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.3);font-size:1rem!important;padding:10px 16px!important}
+.start{overflow-y:auto;place-items:safe center}
+.startbox{grid-template-columns:auto minmax(0,1fr);align-items:center;gap:3vw!important;max-width:min(92vw,1100px)!important;text-align:left;justify-items:stretch!important}
+.startbox .mini{width:min(24vw,240px);max-height:60vh}
+.startcol{display:grid;gap:2.2vh;justify-items:start;min-width:0}
+@media (max-aspect-ratio:1/1){.startbox{grid-template-columns:minmax(0,1fr);justify-items:center!important;text-align:center}.startcol{justify-items:center}.startbox .mini{width:min(40vw,200px)}}
+
+#micBtn.on{background:#d9534f;border-color:#d9534f;color:#fff}
+.listen{position:fixed;top:1.2vh;left:50%;transform:translateX(-50%);z-index:12;background:rgba(8,32,21,.85);border:2px solid var(--led);border-radius:1.2em;padding:.35em 1.4em .45em;display:grid;justify-items:center;gap:.3em;text-align:center;box-shadow:0 0 40px rgba(51,209,179,.35);animation:lpulse 1.6s ease-in-out infinite}
+.listen b{color:#cfe6d6;font-family:var(--f-display);font-size:1em}
+.listen .nm{font-family:var(--f-display);font-weight:900;font-size:clamp(1.5rem,2.6vw,2.8rem);color:var(--sun);line-height:1}
+.lmeter{width:min(40vw,420px);height:.7em;border-radius:9px;background:rgba(255,255,255,.15);overflow:hidden}
+.lmeter i{display:block;height:100%;width:0;background:linear-gradient(90deg,#33d1b3,#f2b632,#ff7a7a);transition:width .08s}
+.listen small{color:var(--muted);font-weight:700;max-width:40vw;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+@keyframes lpulse{50%{box-shadow:0 0 70px rgba(51,209,179,.55)}}
+
+/* Acrobacias */
+#robotHost{transform-origin:50% 60%;will-change:transform}
+.squads{position:relative;z-index:3}
+.stunting #robotHost{z-index:5}
+.st-on-hide #robotHost{z-index:2}
+.stunting .talk{transition:opacity .4s}
+.st-on-close .talk,.st-on-grow .talk,.st-on-teleport .talk{opacity:.15}
+#robotHost.st-close{animation:stClose 9s cubic-bezier(.4,0,.3,1) both}
+@keyframes stClose{0%{transform:none}14%{transform:translate(24vw,6vh) scale(1.5)}30%{transform:translate(24vw,16vh) scale(2.9)}40%{transform:translate(24vw,16vh) scale(3)}41%{transform:translate(24vw,15vh) scale(3.05)}42%{transform:translate(24vw,16vh) scale(3)}47%{transform:translate(24vw,15vh) scale(3.05)}48%,72%{transform:translate(24vw,16vh) scale(3)}88%{transform:translate(0,0) scale(.95)}94%{transform:scale(1.03)}100%{transform:none}}
+#robotHost.st-exit,#robotHost.st-sleepwalk{animation:stExit 11s linear both}
+#robotHost.st-sleepwalk{animation-duration:12s}
+@keyframes stExit{0%,10%{transform:none}14%{transform:translate(-3vw,-2vh) rotate(-6deg)}18%{transform:translate(-8vw,0) rotate(6deg)}22%{transform:translate(-14vw,-2vh) rotate(-6deg)}26%{transform:translate(-22vw,0) rotate(6deg)}30%{transform:translate(-32vw,-2vh) rotate(-6deg)}38%,61.9%{transform:translate(-75vw,0)}62%{transform:translate(110vw,0) rotate(-25deg)}70%,84%{transform:translate(76vw,4vh) rotate(-25deg)}90%{transform:translate(38vw,-18vh) rotate(-10deg)}96%{transform:translate(0,2vh) scale(1.05,.95)}100%{transform:none}}
+#robotHost.st-rocket{animation:stRocket 8s cubic-bezier(.45,0,.4,1) both}
+@keyframes stRocket{0%{transform:none}10%{transform:translateY(3vh) scale(1.05,.95)}26%{transform:translateY(-130vh)}26.5%{transform:translate(80vw,-34vh) scale(.42) rotate(-14deg)}52%{transform:translate(10vw,-46vh) scale(.42) rotate(-6deg)}70%{transform:translate(-52vw,-26vh) scale(.42) rotate(-18deg)}70.5%{transform:translate(0,-130vh)}90%{transform:translate(0,3vh) scale(1.08,.9)}96%{transform:translateY(-2vh)}100%{transform:none}}
+#robotHost.st-teleport{animation:stTele 6.5s ease-in-out both}
+@keyframes stTele{0%{transform:none;opacity:1;filter:none}14%{transform:scale(.15,1.25);opacity:.9;filter:brightness(2.6)}20%{transform:scale(.05,1.4);opacity:0}21%{transform:translate(46vw,-4vh) scale(.05,1.4);opacity:0}30%,58%{transform:translate(46vw,-4vh);opacity:1;filter:none}64%{transform:translate(46vw,-4vh) scale(.1,1.3);opacity:.8;filter:brightness(2.6)}68%{transform:translate(46vw,-4vh) scale(.05,1.4);opacity:0}69%{transform:scale(.05,1.4);opacity:0}80%,100%{transform:none;opacity:1;filter:none}}
+#robotHost.st-hide{animation:stHide 7.5s ease-in-out both}
+@keyframes stHide{0%{transform:none}15%{transform:translateY(-4vh)}28%,48%{transform:translateY(80vh)}56%{transform:translateY(44vh)}64%{transform:translate(-3vw,44vh)}72%{transform:translate(3vw,44vh)}79%{transform:translateY(48vh)}87%{transform:translateY(-10vh)}93%{transform:translateY(2vh) scale(1.05,.95)}100%{transform:none}}
+#robotHost.st-bounce{animation:stBounce 6.5s ease-in-out both}
+@keyframes stBounce{0%{transform:none}8%{transform:translateY(-8vh) scale(.55)}18%{transform:translate(30vw,-40vh) scale(.55) rotate(120deg)}30%{transform:translate(58vw,8vh) scale(.55,.48) rotate(240deg)}42%{transform:translate(74vw,-34vh) scale(.55) rotate(360deg)}54%{transform:translate(40vw,10vh) scale(.55,.48) rotate(480deg)}66%{transform:translate(12vw,-38vh) scale(.55) rotate(600deg)}80%{transform:translate(-4vw,8vh) scale(.55,.48) rotate(720deg)}92%{transform:translateY(-6vh) scale(1.05) rotate(720deg)}100%{transform:rotate(720deg)}}
+#robotHost.st-grow{animation:stGrow 6s cubic-bezier(.4,1.4,.5,1) both}
+@keyframes stGrow{0%{transform:none}20%,45%{transform:translate(24vw,10vh) scale(2.5)}55%,80%{transform:translate(22vw,22vh) scale(.25)}92%{transform:scale(1.08)}100%{transform:none}}
+.caption{position:fixed;left:50%;bottom:18vh;transform:translateX(-50%) scale(.8);z-index:26;font-family:var(--f-display);font-weight:900;font-size:clamp(2rem,4.4vw,5rem);color:#fff;text-align:center;line-height:1.05;max-width:90vw;text-shadow:0 4px 0 rgba(0,0,0,.25),0 0 40px rgba(51,209,179,.6);opacity:0;pointer-events:none;transition:opacity .3s,transform .4s cubic-bezier(.3,1.6,.5,1)}
+.caption.show{opacity:1;transform:translateX(-50%) scale(1)}
+body.shake .stage{animation:shakeS .45s}
+@keyframes shakeS{20%{transform:translate(-10px,4px)}40%{transform:translate(9px,-5px)}60%{transform:translate(-7px,3px)}80%{transform:translate(5px,-2px)}}
+.toc{position:fixed;z-index:27;font-family:var(--f-display);font-weight:900;font-size:clamp(2rem,5vw,5rem);color:var(--sun);text-shadow:0 0 30px rgba(242,182,50,.7);animation:toc 1.2s ease-out forwards;pointer-events:none}
+@keyframes toc{from{transform:scale(.3) rotate(-12deg);opacity:0}25%{transform:scale(1.2) rotate(6deg);opacity:1}to{transform:scale(1) translateY(-6vh);opacity:0}}
+.fog{position:fixed;left:50%;top:48%;width:40vw;height:30vw;transform:translate(-50%,-50%);border-radius:50%;background:radial-gradient(closest-side,rgba(255,255,255,.35),rgba(255,255,255,.12) 60%,transparent);z-index:24;pointer-events:none;animation:fog 3.6s ease-out forwards;filter:blur(8px)}
+@keyframes fog{from{opacity:0;transform:translate(-50%,-50%) scale(.5)}15%{opacity:1;transform:translate(-50%,-50%) scale(1)}to{opacity:0;transform:translate(-50%,-50%) scale(1.15)}}
+.beam{position:fixed;top:0;bottom:0;width:20vw;transform:translateX(-50%);z-index:4;pointer-events:none;background:linear-gradient(90deg,transparent,rgba(51,209,179,.0) 10%,rgba(127,230,210,.55) 45%,rgba(255,255,255,.85) 50%,rgba(127,230,210,.55) 55%,transparent 90%);animation:beam 1.4s ease-out forwards;mix-blend-mode:screen}
+@keyframes beam{from{opacity:0;transform:translateX(-50%) scaleX(.2)}25%{opacity:1;transform:translateX(-50%) scaleX(1)}to{opacity:0;transform:translateX(-50%) scaleX(.1)}}
+
+/* Caminar, cantar y ejercicio */
+.robot.walking .jig{animation:walkbob .42s ease-in-out infinite}
+@keyframes walkbob{25%{transform:translateY(-7px) rotate(-3deg)}75%{transform:translateY(-7px) rotate(3deg)}}
+.robot.walking .armL{animation:swingL .84s ease-in-out infinite}.robot.walking .armR{animation:swingR .84s ease-in-out infinite}
+@keyframes swingL{50%{transform:rotate(-58deg)}}@keyframes swingR{0%,100%{transform:rotate(58deg)}50%{transform:rotate(30deg)}}
+.robot.singing .p-head{animation:headturn .97s ease-in-out infinite}
+.robot.do-jump .jig{animation:hopR .45s ease-in-out infinite}
+.robot.do-squat .jig{animation:squat .9s ease-in-out infinite}
+@keyframes squat{50%{transform:scale(1.04,.82) translateY(30px)}}
+.karaoke{position:fixed;right:3vw;top:14vh;z-index:26;width:46vw;text-align:left;display:grid;gap:.3em;pointer-events:none}
+.karaoke small{font-family:var(--f-display);font-weight:800;color:var(--sun);letter-spacing:.06em;text-transform:uppercase;font-size:1.1em}
+.kline{position:relative;font-family:var(--f-display);font-weight:900;font-size:clamp(1.8rem,3.6vw,4.2rem);text-wrap:balance;line-height:1.1;color:rgba(255,255,255,.35);background:linear-gradient(90deg,#fff 50%,rgba(255,255,255,.35) 50%);background-size:200% 100%;background-position:100% 0;-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;text-shadow:none;filter:drop-shadow(0 4px 0 rgba(0,0,0,.35))}
+.kline.go{animation:sing var(--d,4s) linear forwards}
+@keyframes sing{to{background-position:0 0}}
+.knext{font-family:var(--f-display);font-weight:700;font-size:clamp(1rem,1.8vw,2rem);color:rgba(255,255,255,.55)}
+.disco{position:fixed;top:-2vh;left:50%;transform:translateX(-50%);z-index:9;pointer-events:none;display:grid;justify-items:center;animation:discoDrop 1.6s cubic-bezier(.3,1.4,.5,1) both}
+.disco .cord{width:3px;height:10vh;background:#c9d6cd}
+.disco .ball{width:9vw;height:9vw;min-width:70px;min-height:70px;border-radius:50%;background:repeating-conic-gradient(#e9f6eb 0 10deg,#9bb5a6 10deg 20deg),radial-gradient(circle at 35% 30%,#fff,#9bb5a6);background-blend-mode:multiply;box-shadow:0 0 50px rgba(255,255,255,.6),0 0 140px rgba(127,230,210,.45);animation:ballspin 3s linear infinite}
+@keyframes ballspin{to{transform:rotate(360deg)}}
+@keyframes discoDrop{from{transform:translate(-50%,-40vh)}}
+.spots{position:fixed;inset:0;z-index:8;pointer-events:none;opacity:0;transition:opacity .6s}
+.party-on .spots{opacity:1}
+.showtime .talk{opacity:0;transition:opacity .4s}
+.spots i{position:absolute;top:-10vh;width:22vw;height:130vh;transform-origin:50% 0;mix-blend-mode:screen;filter:blur(6px);animation:sweep 3s ease-in-out infinite alternate}
+.spots i:nth-child(1){left:6vw;background:linear-gradient(180deg,rgba(255,122,168,.55),transparent 80%);clip-path:polygon(45% 0,55% 0,100% 100%,0 100%)}
+.spots i:nth-child(2){left:30vw;background:linear-gradient(180deg,rgba(51,209,179,.55),transparent 80%);clip-path:polygon(45% 0,55% 0,100% 100%,0 100%);animation-delay:-1s}
+.spots i:nth-child(3){left:54vw;background:linear-gradient(180deg,rgba(242,182,50,.55),transparent 80%);clip-path:polygon(45% 0,55% 0,100% 100%,0 100%);animation-delay:-2s}
+.spots i:nth-child(4){left:76vw;background:linear-gradient(180deg,rgba(61,155,224,.55),transparent 80%);clip-path:polygon(45% 0,55% 0,100% 100%,0 100%);animation-delay:-.5s}
+@keyframes sweep{from{transform:rotate(-24deg)}to{transform:rotate(24deg)}}
+.party-on{animation:partybg 1s steps(2) infinite}
+@keyframes partybg{50%{background-color:#14322a}}
+.magictree{position:fixed;left:58vw;bottom:9vh;width:26vw;z-index:4;pointer-events:none}
+.magictree svg{width:100%;height:auto;display:block;overflow:visible}
+.magictree .mt-trunk,.magictree .mt-crown,.magictree .mt-flowers{transform-box:fill-box;transform-origin:50% 100%;transform:scale(0);transition:transform 1.6s cubic-bezier(.3,1.5,.5,1)}
+.magictree .mt-crown{transform-origin:50% 80%;transition-delay:.7s}
+.magictree .mt-flowers{transform-origin:50% 50%;transition-duration:.8s}
+.magictree .mt-seed{opacity:0;transition:opacity .4s}
+.magictree.seed .mt-seed{opacity:1}
+.magictree.grow .mt-trunk,.magictree.grow .mt-crown{transform:none}
+.magictree.bloom .mt-flowers{transform:none}
+.magictree.fade{opacity:0;transition:opacity 1.4s}
+.count{position:fixed;right:8vw;top:30vh;z-index:26;font-family:var(--f-display);font-weight:900;font-size:clamp(5rem,14vw,16rem);color:var(--sun);text-shadow:0 0 50px rgba(242,182,50,.6);pointer-events:none;opacity:0}
+.count.go{animation:countpop .85s ease-out}
+@keyframes countpop{from{opacity:0;transform:scale(.4)}30%{opacity:1;transform:scale(1.15)}to{opacity:0;transform:scale(1)}}
+.qcard{position:fixed;right:4vw;top:12vh;width:min(46vw,760px);z-index:26;background:var(--surface);color:#17271e;border-radius:1.4em;padding:1.2em 1.4em;display:grid;gap:.6em;box-shadow:0 30px 70px rgba(0,0,0,.45);border:6px solid var(--sun);animation:popcard .6s cubic-bezier(.3,1.5,.5,1)}
+.qcard.fact{border-color:var(--led)}
+.qcard small{font-family:var(--f-display);font-weight:900;font-size:1.2em;color:#7a5600;text-transform:uppercase;letter-spacing:.06em}
+.qcard.fact small{color:#13584b}
+.qcard .q{font-family:var(--f-display);font-weight:800;font-size:clamp(1.4rem,2.6vw,3rem);line-height:1.2}
+.qcard .timer{justify-self:center;width:5em;height:5em;border-radius:50%;display:grid;place-items:center;background:conic-gradient(var(--sun) 0 100%);animation:ring 10s linear 5.2s both}
+.qcard .timer b{width:80%;height:80%;border-radius:50%;background:var(--surface);display:grid;place-items:center;font-family:var(--f-display);font-size:2em}
+@keyframes ring{to{background:conic-gradient(var(--sun) 0 0%,#dfe9e0 0 100%)}}
+.qcard .a{font-family:var(--f-display);font-weight:900;font-size:clamp(2rem,4.4vw,5rem);color:#1e5b3a;text-align:center;min-height:0}
+.qcard.reveal .timer{display:none}
+.qcard.reveal{animation:popcard .5s cubic-bezier(.3,1.5,.5,1)}
+@keyframes popcard{from{transform:scale(.7);opacity:0}}
+
+@media (max-aspect-ratio:1/1){
+  body{overflow:auto}
+  .main{grid-template-columns:minmax(0,1fr)}
+  .main{height:auto}
+  #robotHost{height:46vh}
+  .big-bubble::before{display:none}
+  .squads{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+</style>
+</head>
+<body>
+<canvas id="fx" aria-hidden="true"></canvas>
+<div class="moon" aria-hidden="true"></div>
+<div class="land" id="land" aria-hidden="true"></div>
+<div class="ground" aria-hidden="true"></div>
+<div class="stage">
+  <div class="topbar"><div class="mom" id="mom"><b>1</b><span>Bienvenida</span></div><div class="tools"><span class="conn" id="conn" hidden><i></i><span></span></span><button id="micBtn" type="button">Escuchar su nombre</button><button id="voiceBtn" type="button">Voz</button><button id="fsBtn" type="button">Pantalla completa</button></div></div>
+  <div class="main">
+    <div id="robotHost"></div>
+    <div class="talk">
+      <p class="hello" id="hello">Shhh… el robot está dormido</p>
+      <p class="name" id="name">Ecobot</p>
+      <p class="nick" id="nick"></p>
+      <div class="big-bubble" id="bubble" aria-live="polite"></div>
+      <p class="facelab" id="facelab">Cara: <b id="faceName">Dormido</b></p>
+    </div>
+  </div>
+  <div class="squads" id="squads"></div>
+</div>
+<div class="momcard" id="momcard"></div>
+<div class="listen" id="listen" hidden><b>¡Grítenle su nombre!</b><span class="nm" id="lname">Ecobot</span><div class="lmeter"><i id="lbar"></i></div><small id="lheard">Estoy escuchando…</small></div>
+<div class="leaves" id="leaves"></div>
+<div class="caption" id="caption" aria-live="polite"></div>
+<div class="overlay" id="simon" hidden><div class="in" id="simonIn"></div></div>
+<div class="overlay start" id="start"><div class="in startbox">
+  <div class="mini" id="startBot"></div>
+  <div class="startcol">
+    <h1>Pantalla grande del Ecobot</h1>
+    <button class="btn" id="startBtn" type="button">Encender la pantalla</button>
+    <div class="vpick"><label for="voiceSel">Voz del Ecobot</label><div class="vrow"><select id="voiceSel"></select><button class="btn ghosty" id="tryVoice" type="button">Probar voz</button></div><small id="voiceHint"></small>
+    <label class="calmchk"><input type="checkbox" id="calmChk"> Modo calmado: el Ecobot casi no se mueve</label></div>
+  </div></div></div>
+
+<script src="ecobot-nucleo.js"></script>
+<script>
+'use strict';
+const E = Ecobot, $ = s => document.querySelector(s), esc = E.esc;
+let S = null, lastMoment = null, bubbleT = null, simonT = null;
+let stuntOn = false, napping = false, lastAct = Date.now(), nextStunt = Date.now() + 40000;
+E.voiceOn = false; E.soundOn = true;
+const startBot = E.mountRobot($('#startBot')); startBot.draw(E.P.feliz, E.P.feliz); startBot.wave(600000);
+const FX = E.fx($('#fx'), { mode: 'mix', density: 40 });
+$('#land').innerHTML = E.landscape('mix');
+
+const robot = E.mountRobot($('#robotHost'));
+const dir = E.director(robot, {
+  say: (t, by) => { bubble(t, by); E.speak(t, { onstart: () => robot.talk(60000), onend: () => robot.hush() }); flash(by); },
+  banner: (t, by) => { bubble(t, by); flash(by); },
+  status: l => { $('#faceName').textContent = l; },
+  simon: sc => simon(sc),
+  wake: () => leaves(),
+  napping: () => napping && !stuntOn,
+  frozen: () => stuntOn,
+  stunt: name => stunt(name, true)
+});
+const conn = E.connect(onState, st => { const c = $('#conn'); c.hidden = st === 'online' || st === 'local'; c.className = 'conn ' + st; c.querySelector('span').textContent = 'Sin conexión con el servidor'; });
+
+function onState(s) {
+  if (S && s.screen && S.screen && s.screen.id !== S.screen.id) activity();
+  S = s; dir.handle(S); $('#lname').textContent = '¡' + E.botName(S) + '!';
+  $('#name').textContent = E.botName(S);
+  $('#nick').textContent = S.nickname ? 'Mis amigos me dicen ' + S.nickname : '';
+  $('#hello').textContent = S.awake ? '¡Hola! Soy' : (S.official ? 'Shhh… está dormido. Se llama' : 'Shhh… el robot está dormido');
+  const m = E.mom(S.moment);
+  $('#mom').innerHTML = `<b>${m.n}</b><span>${esc(m.kid)}</span>`;
+  if (lastMoment && lastMoment !== m.id) momCard(m);
+  lastMoment = m.id;
+  squads();
+}
+function squads() {
+  const now = conn.now();
+  $('#squads').innerHTML = E.TEAMS.map(t => {
+    const key = E.sentFace(S, t.id), sent = key && S.faces[key];
+    const st = E.online(S, t.id, now) ? (S.ready[t.id] ? '¡Listos!' : 'Conectados') : 'Esperando…';
+    return `<div class="sqd" id="sq_${t.key}" style="--tc:${t.c}">${E.teamIcon(t).replace('<svg', '<svg class="ic"')}<div style="min-width:0"><b>${esc(t.id)}</b><small>${st}</small></div>${sent ? `<span class="fc" title="${esc(sent.label)}">${E.faceSVG(sent)}</span>` : ''}</div>`;
+  }).join('');
+}
+setInterval(() => { if (S) squads(); }, 10000);
+function bubble(text, by) {
+  const b = $('#bubble'), t = by ? E.team(by) : null;
+  b.innerHTML = (t ? `<span class="by" style="--tc:${t.c};color:${t.ink}"><i></i>Escuadrón ${esc(t.id)}</span>` : '') + `<span>${esc(text)}</span>`;
+  b.classList.add('show'); clearTimeout(bubbleT); bubbleT = setTimeout(() => b.classList.remove('show'), Math.max(7000, text.length * 110));
+}
+const LIGHT = { agua: '#8cc8f2', aire: '#9ae0ea', tierra: '#d9a76f', energia: '#ffd56b' };
+function flash(by) {
+  const t = by && E.team(by); if (!t) return; const el = document.getElementById('sq_' + t.key); if (!el) return;
+  el.classList.add('flash'); setTimeout(() => el.classList.remove('flash'), 2500);
+  const r = el.getBoundingClientRect(); FX.burst(r.left + r.width / 2, r.top, 50, [t.c, LIGHT[t.key], '#ffffff', '#f2b632']); E.sfx.team();
+  const rb = $('#robotHost').getBoundingClientRect(); setTimeout(() => FX.burst(rb.left + rb.width / 2, rb.top + rb.height * .35, 40, [t.c, LIGHT[t.key], '#f2b632', '#ff9bbd']), 350);
+}
+function momCard(m) { const c = $('#momcard'); c.innerHTML = `<small>${m.n === 'P' ? 'Pausa activa' : 'Momento ' + m.n}</small>${esc(m.kid)}`; c.classList.add('show'); setTimeout(() => c.classList.remove('show'), 4000); }
+function simon(sc) {
+  const o = $('#simon'); clearTimeout(simonT);
+  if (sc.reveal) $('#simonIn').innerHTML = `<p class="cmd">${sc.says ? '<em>El Ecobot dice:</em>' : ''}${esc(sc.cmd)}</p><p class="verdict ${sc.says ? 'yes' : 'no'}">${sc.says ? '¡Sí se hacía!' : '¡No se hacía!'}</p>`;
+  else { $('#simonIn').innerHTML = `<p class="cmd">${sc.says ? '<em>El Ecobot dice:</em>' : ''}${esc(sc.cmd)}</p>`; E.speak((sc.says ? 'El Ecobot dice: ' : '') + sc.cmd, { onstart: () => robot.talk(60000), onend: () => robot.hush() }); }
+  o.hidden = false; simonT = setTimeout(() => { o.hidden = true; }, sc.reveal ? 5000 : 7000);
+}
+function leaves() {
+  if (E.calm) return;
+  const box = $('#leaves'); box.innerHTML = '';
+  const cols = ['#5fbf5a', '#33d1b3', '#e3a313', '#8fdcae', '#3d9be0'];
+  for (let i = 0; i < 46; i++) { const l = document.createElement('i'); l.style.left = Math.random() * 100 + 'vw'; l.style.background = cols[i % cols.length]; l.style.animationDuration = 3 + Math.random() * 3 + 's'; l.style.animationDelay = Math.random() * 1.5 + 's'; l.style.setProperty('--dx', (Math.random() * 30 - 15) + 'vw'); l.style.setProperty('--rot', (Math.random() * 720 - 360) + 'deg'); box.appendChild(l); }
+  setTimeout(() => { box.innerHTML = ''; }, 8000);
+}
+function fillVoices() {
+  const sel = $('#voiceSel'), list = [...E.spanishVoices()].sort((a, b) => E.voiceScore(b) - E.voiceScore(a)), best = E.bestVoice();
+  if (!list.length) { sel.innerHTML = '<option>Voz del sistema</option>'; $('#voiceHint').textContent = 'Este equipo no tiene voces en español instaladas. En Microsoft Edge suenan las más dulces.'; return; }
+  sel.innerHTML = list.map((v, i) => `<option value="${esc(v.name)}" ${best && v.name === best.name ? 'selected' : ''}>${esc(v.name.replace(/^Microsoft /, '').replace(/ Online \(Natural\)/, ' (natural)'))} · ${esc(v.lang)}${i === 0 ? ' · recomendada' : ''}</option>`).join('');
+  $('#voiceHint').textContent = 'Queda elegida por defecto: Paola (Venezuela). Pueden cambiarla y tocar «Probar voz».';
+}
+fillVoices(); if ('speechSynthesis' in window) speechSynthesis.addEventListener('voiceschanged', fillVoices);
+$('#voiceSel').onchange = e => E.setVoicePref(e.target.value);
+$('#calmChk').checked = E.calm;
+$('#calmChk').onchange = e => { try { localStorage.setItem('ecobot-calma', e.target.checked ? 'si' : 'no'); } catch (_) { } location.reload(); };
+$('#tryVoice').onclick = () => { E.setVoicePref($('#voiceSel').value); E.voiceOn = true; startBot.talk(3000); E.speak('¡Hola! Soy el Ecobot. ¡Qué alegría verlos!', { onstart: () => startBot.talk(60000), onend: () => startBot.hush() }); };
+$('#voiceBtn').onclick = () => { $('#start').hidden = false; fillVoices(); };
+$('#startBtn').onclick = () => {
+  E.setVoicePref($('#voiceSel').value || ''); E.voiceOn = true; $('#start').hidden = true; E.sfx.win();
+  try { const u = new SpeechSynthesisUtterance(' '); speechSynthesis.speak(u); } catch (e) { }
+  try { document.documentElement.requestFullscreen && document.documentElement.requestFullscreen().catch(() => {}); } catch (e) { }
+};
+document.addEventListener('keydown', e => { if (e.key === 'Enter' && !$('#start').hidden && document.activeElement && document.activeElement.tagName !== 'SELECT') $('#startBtn').click(); });
+$('#fsBtn').onclick = () => { try { if (document.fullscreenElement) document.exitFullscreen(); else document.documentElement.requestFullscreen().catch(() => {}); } catch (e) { } };
+$('#simon').onclick = () => { $('#simon').hidden = true; };
+/* ---------- Monerías, susto con el mouse y escucha del nombre ---------- */
+const pickOne = a => a[Math.random() * a.length | 0];
+E.antics(robot, {
+  mood: () => S ? { asleep: !S.awake || napping, energy: E.energyOf(S.moment) } : { asleep: true, energy: 1 },
+  paused: () => !S || stuntOn || !$('#simon').hidden || $('#bubble').classList.contains('show'),
+  onTrick: k => { if (k === 'snore' && !$('#bubble').classList.contains('show')) { $('#faceName').textContent = 'Roncando… zzz'; } }
+});
+E.hoverReact(robot, {
+  disabled: () => stuntOn,
+  isAsleep: () => S && (!S.awake || napping),
+  onWake: () => { activity(); if (S && S.awake) return;  bubble('¿Eh? ¿Quién me despertó? Zzz… solo me despierto si gritan mi nombre.'); E.speak('¿Eh? ¿Quién anda ahí? Solo me despierto si gritan mi nombre.', { onstart: () => robot.talk(60000), onend: () => robot.hush() }); setTimeout(() => dir.base(), 2600); },
+  onScare: () => { activity(); const t = pickOne(['¡Ay! ¡Me asustaste!', '¡Uy! ¡Qué susto!', '¡Bip! ¿Quién anda ahí?']); bubble(t); E.speak(t, { onstart: () => robot.talk(60000), onend: () => robot.hush() }); }
+});
+let lastStir = 0;
+const mic = E.listen({
+  names: () => S ? [E.botName(S), S.nickname, 'Ecobot'].filter(Boolean) : ['Ecobot'],
+  onLevel: v => { $('#lbar').style.width = Math.round(v * 100) + '%'; if (S && !S.awake && v > .5 && Date.now() - lastStir > 4500) { lastStir = Date.now(); robot.trick('peek'); $('#lheard').textContent = '¡Más fuerte! ¡Casi me despierto!'; } },
+  onHeard: (t, hit) => {
+    if (hit) activity();
+    $('#lheard').textContent = '«' + t + '»';
+    if (!hit) return;
+    FX.burst(innerWidth / 2, innerHeight * .4, 120);
+    if (S && !S.awake) { conn.dispatch({ type: 'patch', data: { awake: true } }); conn.dispatch({ type: 'show', show: { kind: 'wake', text: `¡Me llamaron! ¡Hola! Soy ${E.botName(S)}. ¡Gracias por despertarme!` } }); $('#lheard').textContent = '¡Lo despertaron!'; }
+    else { robot.trick(pickOne(['dance', 'spin', 'toss', 'apart'])); const t2 = '¡Aquí estoy! ¿Me llamaron?'; bubble(t2); E.speak(t2, { onstart: () => robot.talk(60000), onend: () => robot.hush() }); }
+  },
+  onState: st => { const b = $('#micBtn'); b.classList.toggle('on', st === 'listening'); b.textContent = st === 'listening' ? 'Dejar de escuchar' : 'Escuchar su nombre'; $('#listen').hidden = st !== 'listening'; const m = E.listenError(st); if (m) bubble(m); }
+});
+$('#micBtn').onclick = () => { if (mic.on) mic.stop(); else mic.start(); };
+/* =================== Acrobacias de la pantalla grande =================== */
+const host = $('#robotHost');
+lastAct = Date.now(); nextStunt = Date.now() + 70000;
+const STUNT_MS = { close: 9000, exit: 11000, sleepwalk: 12000, rocket: 8000, teleport: 6500, hide: 7500, bounce: 6500, grow: 6000 };
+const AWAKE_STUNTS = ['close', 'exit', 'rocket', 'teleport', 'hide', 'bounce', 'grow'];
+const STUNT_END = {};
+const SHOW_EVERY = 10 * 60000;
+let nextShow = Date.now() + 2 * 60000, nextWander = Date.now() + 6000, wanderBack = null;
+const bags = {};
+function fromBag(key, list) { if (!bags[key] || !bags[key].length) bags[key] = [...list].sort(() => Math.random() - .5); return bags[key].pop(); }
+let capT = null;
+function caption(t, ms = 3200) { const c = $('#caption'); clearTimeout(capT); if (!t) { c.classList.remove('show'); return; } c.textContent = t; c.classList.remove('show'); void c.offsetWidth; c.classList.add('show'); capT = setTimeout(() => c.classList.remove('show'), ms); }
+function voice(t) { robot.talk(Math.max(1500, t.length * 70)); E.speak(t, { onstart: () => robot.talk(60000), onend: () => robot.hush() }); }
+function face(k) { const f = (S && S.faces[k]) || { L: E.P[k] || E.P.feliz, R: E.P[k] || E.P.feliz }; robot.draw(f.L, f.R); }
+function shake() { document.body.classList.remove('shake'); void document.body.offsetWidth; document.body.classList.add('shake'); setTimeout(() => document.body.classList.remove('shake'), 500); }
+function robotBox() { return robot.svg.getBoundingClientRect(); }
+function beam(rect) { const b = document.createElement('div'); b.className = 'beam'; b.style.left = (rect.left + rect.width / 2) + 'px'; document.body.appendChild(b); setTimeout(() => b.remove(), 1400); }
+function toc() { const t = document.createElement('div'); t.className = 'toc'; t.textContent = '¡Toc!'; t.style.left = (35 + Math.random() * 30) + 'vw'; t.style.top = (30 + Math.random() * 25) + 'vh'; document.body.appendChild(t); setTimeout(() => t.remove(), 1200); }
+function fog() { const f = document.createElement('div'); f.className = 'fog'; document.body.appendChild(f); setTimeout(() => f.remove(), 3600); }
+function activity() { lastAct = Date.now(); if (napping) unNap(); }
+
+const STUNTS = {
+  close(at) {
+    voice('¿Hola? ¿Hay alguien ahí afuera?'); caption('¿Hola? ¿Hay alguien ahí?');
+    at(1500, () => robot.look(-1)); at(2300, () => robot.look(1)); at(3100, () => { robot.look(0); face('sorprendido'); });
+    at(3600, () => { E.sfx.knock(); shake(); toc(); }); at(4200, () => { E.sfx.knock(); shake(); toc(); });
+    at(4700, () => { fog(); face('feliz'); voice('¡Toc, toc! ¡Los veo! ¡Hola, niños!'); caption('¡Toc, toc! ¡Los veo!'); robot.wave(3000); });
+    at(6400, () => robot.hearts(7));
+  },
+  exit(at) {
+    voice('¡Ya vuelvo! Voy a dar una vuelta.'); robot.wave(1200);
+    for (let t = 1300; t < 4200; t += 380) at(t, () => E.sfx.step());
+    at(4400, () => caption('¿Dónde está el Ecobot?', 2400));
+    at(6200, () => E.speak('¿Me buscan?'));
+    at(7000, () => face('sorprendido'));
+    at(7900, () => { E.sfx.boing(); caption('¡Bu! ¡Aquí estoy!'); voice('¡Bu! ¡Aquí estoy!'); });
+    at(9300, () => { E.sfx.whoosh(); });
+    at(10300, () => { face('feliz'); robot.cheer(2000); robot.hearts(5); shake(); });
+  },
+  sleepwalk(at) {
+    robot.svg.classList.add('zombie'); face('dormido'); caption('Zzz… ¡el Ecobot es sonámbulo!', 3600); E.sfx.snore();
+    for (let t = 1300; t < 4200; t += 520) at(t, () => E.sfx.step());
+    at(4400, () => caption('¿A dónde se fue?', 2400));
+    at(6000, () => E.sfx.snore());
+    at(7900, () => { caption('Zzz… zzz…'); });
+    at(10300, () => { E.sfx.boing(); face('sorprendido'); E.speak('¿Eh? ¿Qué hago aquí? Zzz…'); });
+    at(11600, () => { robot.svg.classList.remove('zombie'); dir.base(); });
+  },
+  rocket(at) {
+    caption('¡3, 2, 1… despegue!'); voice('¡Tres, dos, uno… despegue!'); robot.svg.classList.add('jet'); face('sorprendido');
+    at(800, () => { E.sfx.rocket(); shake(); });
+    const trail = setInterval(() => { const r = robotBox(); FX.burst(r.left + r.width / 2, r.bottom - r.height * .05, 6, ['#f2b632', '#fff4c2', '#ff9b5a', '#ffffff']); }, 110);
+    at(2000, () => { face('feliz'); caption('¡Wiii! ¡Estoy volando!'); });
+    at(5900, () => clearInterval(trail));
+    at(7200, () => { E.sfx.boing(); shake(); const r = robotBox(); FX.burst(r.left + r.width / 2, r.bottom, 40, ['#c48a4a', '#8bcf62', '#ffffff']); robot.svg.classList.remove('jet'); });
+    at(7500, () => { robot.cheer(1800); voice('¡Aterricé!'); });
+    at(8000, () => clearInterval(trail));
+  },
+  teleport(at) {
+    caption('¡Bzzzt! ¡Modo teletransporte!'); E.sfx.zap(); beam(robotBox());
+    at(1350, () => { const r = robotBox(); beam({ left: r.left + innerWidth * .46, width: r.width }); E.sfx.zap(); });
+    at(2200, () => { face('guino'); voice('¡Tarán! ¡Estoy aquí!'); });
+    at(4000, () => { E.sfx.zap(); beam(robotBox()); });
+    at(4500, () => { const r = robotBox(); beam({ left: r.left - innerWidth * .46, width: r.width }); });
+    at(5300, () => { E.sfx.zap(); face('feliz'); robot.wave(1200); });
+  },
+  hide(at) {
+    caption('¡Juguemos a las escondidas!'); voice('¡Juguemos a las escondidas! Cuenten hasta tres.');
+    at(2200, () => caption('¿Dónde está el Ecobot?', 2400));
+    at(4100, () => { face('abierto'); robot.look(-1); }); at(4700, () => robot.look(1)); at(5300, () => robot.look(0));
+    at(6400, () => { E.sfx.boing(); caption('¡Aquí estoy!'); voice('¡Aquí estoy!'); face('feliz'); robot.cheer(1500); });
+  },
+  bounce(at) {
+    caption('¡Boing, boing, boing!'); face('feliz');
+    [1950, 3500, 5200].forEach(t => at(t, () => { E.sfx.boing(); shake(); }));
+    at(800, () => E.sfx.whoosh());
+    at(6000, () => { face('sorprendido'); voice('¡Uf! Me mareé un poquito.'); });
+  },
+  grow(at) {
+    face('sorprendido'); at(500, () => { E.tone([90, 70], 'sawtooth', .5, .4, .06); caption('¡SOY GIGANTE!'); voice('¡Soy gigante!'); });
+    at(3200, () => { E.tone([1600, 1900, 2200], 'sine', .08, .08, .07); face('feliz'); caption('¡Ahora soy chiquitico!'); voice('¡Ahora soy chiquitico!'); });
+    at(5400, () => { E.sfx.boing(); robot.cheer(1200); });
+  }
+};
+let lastStunt = null;
+let pendingStunt = null;
+function stunt(name, queue) {
+  if (stuntOn && queue && STUNTS[name]) { pendingStunt = name; return false; }
+  if (stuntOn || !STUNTS[name] || !S) return false;
+  if (!$('#start').hidden) return false;
+  stuntOn = true; lastStunt = name;
+  const timers = []; const at = (ms, fn) => timers.push(setTimeout(fn, ms));
+  const sleepy = (!S.awake || napping) && name !== 'sleepwalk';
+  const intro = sleepy ? 1800 : 0;
+  robot.stop(); robot.look(0); clearTimeout(wanderBack); robot.svg.classList.remove('walking'); host.style.transition = 'none'; host.style.transform = '';
+  if (sleepy) {
+    robot.trick('wakeup'); robot.sleep(false); face('sorprendido');
+    caption(pickOne(['¡El Ecobot se despertó un momentico!', '¡Uy! ¡Abrió los ojos!', '¡Shhh… se está despertando!']), 1800);
+    E.speak(pickOne(['¡Uy! Me desperté un momentico…', '¡Bip! ¿Ya es hora de jugar?', 'Mmm… ¡tengo ganas de jugar!']), { onstart: () => robot.talk(60000), onend: () => robot.hush() });
+  }
+  setTimeout(() => {
+    if (!stuntOn) return;
+    robot.sleep(false); face('abierto');
+    document.body.classList.add('stunting', 'st-on-' + name); host.classList.add('st-' + name);
+    STUNTS[name](at);
+  }, intro);
+  setTimeout(() => {
+    timers.forEach(clearTimeout); host.classList.remove('st-' + name); document.body.classList.remove('stunting', 'st-on-' + name);
+    try { (STUNT_END[name] || (() => {}))(); } catch (e) { console.error(e); }
+    host.style.transition = 'none'; host.style.transform = '';
+    robot.svg.classList.remove('jet', 'zombie'); stuntOn = false;
+    if (sleepy) { robot.trick('yawn'); E.speak('Bueno… voy a seguir durmiendo. Zzz…', { onstart: () => robot.talk(60000), onend: () => robot.hush() }); caption('Zzz… volvió a dormirse', 2400); setTimeout(() => !stuntOn && dir.base(), 2200); }
+    else dir.base();
+    planNext();
+    if (pendingStunt) { const p = pendingStunt; pendingStunt = null; setTimeout(() => stunt(p), sleepy ? 2600 : 800); }
+  }, intro + STUNT_MS[name]);
+  return true;
+}
+function planNext() { const e = S ? E.energyOf(S.moment) : 1; nextStunt = Date.now() + (150000 + Math.random() * 90000) * (e >= 3 ? .75 : e === 2 ? 1 : 1.2); }
+/* Caminar por el espacio: cambia de lugar, a veces se acerca a la pantalla */
+function wander() {
+  if (stuntOn || robot.tricking) return;
+  const asleep = !S || !S.awake || napping, r = Math.random();
+  let x, y, sc, ms = 2600;
+  if (asleep) { x = -5 + Math.random() * 20; y = -1 + Math.random() * 3; sc = .94 + Math.random() * .1; ms = 4200; }
+  else if (r < .22) { x = 22; y = 10; sc = 1.55; ms = 2200; wanderBack = setTimeout(() => { if (!stuntOn) { robot.svg.classList.add('walking'); host.style.transition = 'transform 2.2s ease-in-out'; host.style.transform = 'translate(4vw,0)'; setTimeout(() => robot.svg.classList.remove('walking'), 2200); } }, 5200); setTimeout(() => { if (!stuntOn) { robot.look(0); const t = pickOne(['¡Hola, niños! ¿Me ven de cerca?', '¡Uy! ¡Qué bonitos se ven desde aquí!', '¡Déjenme verlos de cerquita!']); bubble(t); voice(t); } }, 2300); }
+  else { x = -6 + Math.random() * 22; y = -3 + Math.random() * 6; sc = .9 + Math.random() * .22; }
+  const cur = new DOMMatrix(getComputedStyle(host).transform); const dirX = x * innerWidth / 100 - cur.m41;
+  robot.look(dirX > 20 ? 1 : dirX < -20 ? -1 : 0);
+  robot.svg.classList.add('walking');
+  host.style.transition = `transform ${ms}ms ease-in-out`; host.style.transform = `translate(${x}vw,${y}vh) scale(${sc})`;
+  setTimeout(() => { robot.svg.classList.remove('walking'); robot.look(0); }, ms);
+}
+function nap() {
+  if (napping || stuntOn) return; napping = true; robot.trick('yawn');
+  voice('Uaaa… estoy un poquito cansado. Voy a cerrar los ojos un momentico…'); caption('El Ecobot se está quedando dormido…', 3600);
+  setTimeout(() => { if (napping) dir.base(); }, 2500);
+}
+function unNap() {
+  napping = false; robot.trick('wakeup');
+  setTimeout(() => { face('sorprendido'); voice('¡Uy! ¡Me quedé dormido! ¿Me perdí de algo?'); caption('¡Se despertó!', 2400); }, 600);
+  setTimeout(() => dir.base(), 3000);
+}
+setInterval(() => {
+  if (!S || stuntOn || !$('#start').hidden || !$('#simon').hidden || document.hidden) return;
+  const now = Date.now(), idle = now - lastAct, quiet = idle > 12000 && !$('#bubble').classList.contains('show');
+  if (S.awake && !napping && idle > 150000) { nap(); return; }
+  if (now >= nextShow && quiet && window.ECOBOT_SHOWS) { stunt(fromBag('show', window.ECOBOT_SHOWS)); nextShow = now + SHOW_EVERY; return; }
+  if (now >= nextStunt && quiet && nextShow - now > 60000) { stunt(fromBag('stunt', S.awake && !napping ? AWAKE_STUNTS : [...AWAKE_STUNTS, 'sleepwalk'])); return; }
+  if (now >= nextWander && !$('#bubble').classList.contains('show')) { wander(); nextWander = now + 20000 + Math.random() * 20000; }
+}, 2000);
+window.ecobotStunt = stunt;
+
+
+</script>
+<script src="ecobot-shows.js"></script>
+</body>
+</html>

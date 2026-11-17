@@ -1,0 +1,714 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Ecobot · Escuadrón</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700;800;900&family=Nunito:wght@700;800;900&display=swap">
+<link rel="stylesheet" href="ecobot-base.css">
+<style>
+/* Mundo mágico del escuadrón: bosque de noche con partículas del elemento (burbujas, viento, hojas o chispas),
+   el Ecobot como compañero que habla, y cada misión como una tarjeta luminosa. Un solo look oscuro, a propósito. */
+:root{
+  color-scheme:dark;
+  --night:#0a281b; --night-2:#123d29; --night-3:#1a5236;
+  --card:#fffdf6; --card-2:#f1f7f0; --ink:#173024; --muted:#5b7065; --line:#dfe9e0;
+  --heading:#173024; --brand:#1e5b3a; --brand-2:#2f7d50; --brand-ink:#fff; --brand-soft:#dff0e4;
+  --led:#33d1b3; --led-off:#1e3b36; --screen:#0b1f1c;
+  --sun:#f2b632; --sun-deep:#e3a313; --sun-bg:#fff4d1; --sun-ink:#7a5600; --sun-line:#f0c95a;
+  --robot:#e9f6eb; --robot-line:#1e5b3a; --robot-body:#cfe8d6; --danger:#d9534f;
+  --tc:#33d1b3; --tc2:#7fe6d2; --tsoft:#e0f7f2; --tink:#13584b; --tglow:rgba(51,209,179,.45);
+  --surface:#fffdf6; --surface-2:#f1f7f0;
+  --f-display:'Poppins', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --f-body:'Nunito', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+}
+html,body{min-height:100%}
+body{font-size:19px;color:#fff;background:var(--night);background-image:radial-gradient(120% 70% at 15% -10%,var(--tglow),transparent 60%),radial-gradient(90% 60% at 100% 110%,rgba(242,182,50,.16),transparent 60%),linear-gradient(180deg,var(--night-2),var(--night) 70%);background-attachment:fixed;overflow-x:hidden}
+#fx{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:0}
+#app{position:relative;z-index:1;min-height:100vh}
+.wrap{max-width:1040px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:18px 60px}
+
+/* Barra del escuadrón */
+.bar{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:rgba(8,32,21,.72);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-bottom:1px solid rgba(255,255,255,.08)}
+.bar-in{max-width:1040px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:10px;display:flex;gap:12px;align-items:center;justify-content:space-between}
+.me{display:flex;gap:12px;align-items:center;min-width:0}
+.orb{width:54px;height:54px;border-radius:50%;flex:none;display:grid;place-items:center;background:radial-gradient(circle at 35% 30%,#fff 0 18%,var(--tc2) 45%,var(--tc) 80%);box-shadow:0 0 0 3px rgba(255,255,255,.25),0 0 24px var(--tglow)}
+.orb svg{width:32px;height:32px;background:#fff;border-radius:50%;padding:3px}
+.me b{display:block;font-family:var(--f-display);font-weight:800;font-size:1.25rem;line-height:1.1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.me small{display:block;color:#bfe0cd;font-weight:800;font-size:.85rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.me > div{min-width:0}
+.bar-r{display:flex;gap:8px;align-items:center;flex:none}
+.stars{display:inline-flex;align-items:center;gap:6px;background:rgba(242,182,50,.16);border:1px solid rgba(242,182,50,.45);color:#ffe08a;border-radius:999px;padding:5px 12px;font-family:var(--f-display);font-weight:800;font-size:1rem;font-variant-numeric:tabular-nums}
+.stars svg{width:20px;height:20px}
+.stars.bump{animation:bump .5s}
+@keyframes bump{40%{transform:scale(1.25)}}
+.ibtn{width:42px;height:42px;border-radius:50%;border:1px solid rgba(255,255,255,.2);background:rgba(255,255,255,.08);color:#fff;display:grid;place-items:center;cursor:pointer}
+.ibtn svg{width:22px;height:22px}
+.out{border:1px solid rgba(255,255,255,.25);background:transparent;color:#d9eee1;border-radius:999px;padding:8px 14px;font-weight:800;cursor:pointer;font-size:.85rem}
+.out.sure{background:var(--danger);border-color:var(--danger);color:#fff}
+
+/* Compañero */
+.buddy{display:grid;grid-template-columns:150px minmax(0,1fr);gap:18px;align-items:center;margin-bottom:22px}
+.buddy .bot{width:150px;filter:drop-shadow(0 12px 24px rgba(0,0,0,.35))}
+.speech{position:relative;background:var(--card);color:var(--ink);border-radius:26px;padding:16px 20px;font-family:var(--f-display);font-weight:700;font-size:clamp(1.15rem,1rem + .8vw,1.5rem);line-height:1.3;box-shadow:0 14px 34px rgba(0,0,0,.28)}
+.speech::before{content:"";position:absolute;left:-10px;top:50%;width:22px;height:22px;background:var(--card);transform:translateY(-50%) rotate(45deg);border-radius:4px}
+.speech small{display:block;font-family:var(--f-body);font-size:.68em;font-weight:900;letter-spacing:.08em;text-transform:uppercase;color:var(--tink);margin-bottom:2px}
+
+/* Misiones */
+.missions{display:grid;gap:22px}
+.mission{background:var(--card);color:var(--ink);border-radius:30px;padding:22px 22px 24px;display:grid;gap:16px;box-shadow:0 18px 40px rgba(0,0,0,.28);position:relative;min-width:0}
+.mission.off{background:rgba(255,253,246,.72)}
+.m-head{display:flex;gap:10px 14px;align-items:center;flex-wrap:wrap}
+.chip-m{display:inline-flex;align-items:center;gap:6px;border-radius:999px;padding:5px 12px;background:var(--tsoft);color:var(--tink);font-weight:900;font-size:.8rem;letter-spacing:.06em;text-transform:uppercase}
+.chip-m.ok{background:var(--sun-bg);color:var(--sun-ink)}
+.chip-m svg{width:16px;height:16px}
+.mission h2{font-family:var(--f-display);font-size:clamp(1.4rem,1.15rem + 1.2vw,1.9rem);font-weight:800;color:var(--ink);line-height:1.15;width:100%}
+.mission p.say{font-size:1.1rem;color:#33493d;max-width:56ch}
+.mission .note{font-size:1rem;color:var(--muted);font-weight:700}
+
+/* Botones */
+.magic{position:relative;border:0;border-radius:999px;background:linear-gradient(180deg,var(--tc2),var(--tc));color:#06231a;font-family:var(--f-display);font-weight:800;font-size:1.35rem;padding:16px 30px;cursor:pointer;display:inline-flex;gap:10px;align-items:center;justify-content:center;box-shadow:0 6px 0 rgba(0,0,0,.22),0 10px 30px var(--tglow);transition:transform .08s,box-shadow .08s;text-align:center;line-height:1.15}
+.magic.dark{color:#fff}
+.magic:active{transform:translateY(4px);box-shadow:0 2px 0 rgba(0,0,0,.22),0 6px 18px var(--tglow)}
+.magic:disabled{filter:grayscale(.8);opacity:.5;cursor:not-allowed}
+.magic svg{width:26px;height:26px;flex:none}
+.soft{border:2px solid var(--line);background:#fff;color:var(--ink);border-radius:999px;padding:10px 18px;font-family:var(--f-display);font-weight:700;font-size:1rem;cursor:pointer;display:inline-flex;gap:8px;align-items:center;justify-content:center}
+.soft svg{width:20px;height:20px;flex:none}
+.soft:active{transform:translateY(2px)}
+.row{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.done{display:flex;gap:10px;align-items:center;background:var(--sun-bg);color:var(--sun-ink);border-radius:18px;padding:12px 16px;font-weight:900;font-size:1.05rem}
+.done svg{width:28px;height:28px;flex:none}
+
+/* Botón gigante del momento 1 */
+.bigbtn{width:min(70vw,250px);aspect-ratio:1;border-radius:50%;border:0;cursor:pointer;justify-self:center;background:radial-gradient(circle at 35% 30%,#fff 0 10%,var(--tc2) 40%,var(--tc) 75%);color:#06231a;font-family:var(--f-display);font-weight:900;font-size:clamp(1.4rem,1.1rem + 1.4vw,1.9rem);line-height:1.1;box-shadow:0 0 0 10px rgba(255,255,255,.6),0 0 0 22px var(--tsoft),0 20px 50px var(--tglow);animation:breathe 2.6s ease-in-out infinite;padding:20px}
+.bigbtn:active{transform:scale(.95)}
+@keyframes breathe{50%{box-shadow:0 0 0 14px rgba(255,255,255,.6),0 0 0 30px var(--tsoft),0 20px 60px var(--tglow)}}
+
+/* Palabras */
+.words{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,150px),1fr));gap:12px}
+.word{border:3px solid var(--line);background:#fff;border-radius:20px;padding:16px 8px;font-family:var(--f-display);font-weight:800;font-size:1.2rem;cursor:pointer;color:var(--ink);transition:transform .12s,background .2s,border-color .2s}
+.word[aria-pressed="true"]{border-color:var(--tc);background:var(--tsoft);color:var(--tink);transform:translateY(-3px);box-shadow:0 8px 18px var(--tglow)}
+.slots{display:flex;gap:8px;align-items:center;font-weight:900;color:var(--muted)}
+.slots i{width:30px;height:30px;display:grid;place-items:center}
+.slots i svg{width:30px;height:30px}
+.slots i svg path{fill:#e3e9e4;stroke:#c9d4cc;stroke-width:1}
+.slots i.on svg path{fill:var(--sun);stroke:var(--sun-deep)}
+.inp{width:100%;border:3px solid var(--line);background:#fff;border-radius:18px;padding:14px 18px;font-family:var(--f-display);font-weight:700;font-size:1.35rem;color:var(--ink);min-width:0}
+.inp:focus{outline:none;border-color:var(--tc);box-shadow:0 0 0 5px var(--tsoft)}
+.inp.huge{font-size:clamp(1.6rem,1.2rem + 2vw,2.4rem);font-weight:800;color:var(--tink);text-align:center}
+.tip{background:var(--sun-bg);color:var(--sun-ink);border-radius:16px;padding:10px 14px;font-weight:800;font-size:1rem}
+.vote{display:grid;gap:10px}
+.vote button{border:3px solid var(--line);background:#fff;border-radius:22px;padding:14px 18px;font-family:var(--f-display);font-weight:800;font-size:1.4rem;cursor:pointer;text-align:left;display:flex;justify-content:space-between;align-items:center;gap:10px;color:var(--ink);min-width:0}
+.vote button span{overflow-wrap:anywhere;min-width:0}
+.vote button small{font-family:var(--f-body);font-size:.8rem;color:var(--muted);flex:none}
+.vote button[aria-pressed="true"]{border-color:var(--tc);background:var(--tsoft);color:var(--tink);box-shadow:0 8px 18px var(--tglow)}
+.namebig{font-family:var(--f-display);font-weight:900;font-size:clamp(2.6rem,1.6rem + 6vw,5rem);line-height:1;text-align:center;overflow-wrap:anywhere;background:linear-gradient(180deg,var(--tc2),var(--tc));-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 4px 0 rgba(0,0,0,.12))}
+
+/* Caras */
+.faces{display:grid;grid-template-columns:repeat(auto-fill,minmax(122px,1fr));gap:12px}
+.face{position:relative;border:3px solid var(--line);background:#fff;border-radius:20px;padding:8px 8px 10px;display:grid;gap:6px;justify-items:center;cursor:pointer;color:var(--ink);font-family:var(--f-display);font-weight:700;font-size:.92rem;line-height:1.15;text-align:center;min-width:0;transition:transform .12s}
+.face svg{width:100%;height:auto;background:var(--screen);border-radius:12px;padding:6px;display:block}
+.face span{overflow-wrap:anywhere;min-width:0;max-width:100%}
+.face[aria-pressed="true"]{border-color:var(--tc);background:var(--tsoft);color:var(--tink);transform:translateY(-3px);box-shadow:0 8px 20px var(--tglow)}
+.face[aria-pressed="true"]::after{content:"";position:absolute;top:-10px;right:-10px;width:30px;height:30px;border-radius:50%;background:var(--sun) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%237a5600' stroke-width='3.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 12.5l4.5 4.5L19 7'/%3E%3C/svg%3E") center/18px no-repeat;box-shadow:0 2px 6px rgba(0,0,0,.2)}
+
+/* Ojos */
+.eyes2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.board{background:radial-gradient(120% 100% at 50% 0%,#15352f,var(--screen));border-radius:26px;padding:14px 10px 14px;display:grid;justify-items:center;gap:10px;min-width:0;box-shadow:inset 0 0 0 3px rgba(51,209,179,.18)}
+.board b{color:#cfeee4;font-family:var(--f-display);font-weight:700;font-size:1rem}
+.board .ledgrid{--cs:min(4.1vw,40px);gap:min(.75vw,6px)}
+.board .soft{font-size:.92rem;padding:8px 14px;background:rgba(255,255,255,.1);color:#e7f7ef;border-color:rgba(255,255,255,.2)}
+.send-row{display:grid;grid-template-columns:auto minmax(0,1fr);gap:18px;align-items:center}
+
+/* Situaciones (una a la vez) */
+.sitnav{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.dots{display:flex;gap:8px;flex-wrap:wrap}
+.dots button{width:18px;height:18px;border-radius:50%;border:0;background:#dbe5dd;cursor:pointer;padding:0}
+.dots button.ok{background:var(--sun)}
+.dots button.cur{outline:3px solid var(--tc);outline-offset:2px}
+.sitart{border-radius:24px;overflow:hidden;max-width:520px;width:100%;justify-self:center;box-shadow:0 10px 24px rgba(0,0,0,.12)}
+.sitart svg{width:100%;height:auto;display:block}
+.arrow{width:52px;height:52px;border-radius:50%;border:2px solid var(--line);background:#fff;cursor:pointer;display:grid;place-items:center;flex:none;color:var(--ink)}
+.arrow svg{width:24px;height:24px}
+.arrow:disabled{opacity:.35}
+
+/* Puertas del momento 5 */
+.doors{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-bottom:22px}
+.door{border:0;border-radius:24px;padding:14px 8px;background:rgba(255,255,255,.1);color:#fff;font-family:var(--f-display);font-weight:800;font-size:1.1rem;cursor:pointer;display:grid;justify-items:center;gap:6px;border:2px solid rgba(255,255,255,.15)}
+.door svg{width:38px;height:38px}
+.door[aria-selected="true"]{background:var(--card);color:var(--tink);border-color:var(--card);box-shadow:0 10px 30px var(--tglow)}
+.door small{font-family:var(--f-body);font-size:.75rem;font-weight:900;opacity:.75}
+.wcount{display:flex;gap:5px;align-items:center;flex-wrap:wrap;font-weight:900;color:var(--muted);font-size:.95rem}
+.wcount i{width:13px;height:13px;border-radius:50%;background:#dfe7e1}
+.wcount i.f{background:var(--tc)}
+.wcount i.x{background:var(--danger)}
+.wcount span{margin-right:6px}
+.tpl{display:flex;gap:8px;flex-wrap:wrap}
+.tpl button{border:2px dashed var(--tc);background:#fff;color:var(--tink);border-radius:999px;padding:8px 14px;font-weight:900;cursor:pointer;font-size:1rem}
+.mine{display:grid;gap:8px}
+.mine div{display:flex;gap:10px;align-items:center;justify-content:space-between;background:var(--card-2);border-radius:16px;padding:10px 14px;font-weight:800;color:var(--ink)}
+.mine div span{overflow-wrap:anywhere;min-width:0}
+.mine .x{flex:none}
+select.inp{font-size:1.15rem}
+.rate{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.rate .face{font-size:1.1rem}
+
+/* Pantalla de entrada */
+.gate{min-height:100vh;display:grid;align-content:center;justify-items:center;gap:22px;text-align:center;padding-block:30px}
+.gate h1{color:#fff;font-size:clamp(1.9rem,1.3rem + 3vw,3rem);font-weight:900;text-shadow:0 0 30px rgba(51,209,179,.35);line-height:1.1}
+.gate p{color:#cde6d6;font-size:1.15rem;max-width:36ch}
+.gate .bot{width:min(46vw,190px)}
+.orbs{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:18px;width:100%;max-width:900px}
+.orbbtn{border:0;background:none;cursor:pointer;display:grid;justify-items:center;gap:10px;color:#fff;font-family:var(--f-display);font-weight:800;font-size:1.2rem;padding:6px}
+.orbbtn .orb{width:min(26vw,150px);height:min(26vw,150px);animation:pulse 3s ease-in-out infinite}
+.orbbtn .orb svg{width:52%;height:52%;padding:8%}
+.orbbtn:nth-child(2) .orb{animation-delay:-.7s}.orbbtn:nth-child(3) .orb{animation-delay:-1.4s}.orbbtn:nth-child(4) .orb{animation-delay:-2.1s}
+.orbbtn:active .orb{transform:scale(.94)}
+@keyframes pulse{50%{box-shadow:0 0 0 6px rgba(255,255,255,.25),0 0 46px var(--tglow)}}
+.padbox{background:var(--card);color:var(--ink);border-radius:32px;padding:22px;width:min(100%,420px);display:grid;gap:16px;box-shadow:0 24px 60px rgba(0,0,0,.4)}
+.padbox h2{color:var(--ink);font-size:1.5rem;display:flex;gap:10px;align-items:center;justify-content:center}
+.padbox h2 .orb{width:46px;height:46px}
+.padbox h2 .orb svg{width:28px;height:28px}
+.pindots{display:flex;gap:16px;justify-content:center}
+.pindots i{width:26px;height:26px;border-radius:50%;background:var(--led-off);transition:background .15s,box-shadow .15s}
+.pindots i.f{background:var(--led);box-shadow:0 0 14px var(--led)}
+.keys{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.keys button{border:0;border-radius:20px;background:var(--card-2);font-family:var(--f-display);font-weight:800;font-size:1.8rem;padding:12px 0;cursor:pointer;color:var(--ink)}
+.keys button:active{background:var(--tsoft)}
+.keys .w{font-size:1rem}
+.keys .go{background:var(--tc);color:#06231a}
+.err{color:var(--danger);font-weight:900;min-height:1.4em}
+.shake{animation:shake .4s}
+@keyframes shake{20%,60%{transform:translateX(-10px)}40%,80%{transform:translateX(10px)}}
+.link{border:0;background:none;color:var(--muted);font-weight:900;cursor:pointer;text-decoration:underline;font-size:1rem}
+.look{min-height:calc(100vh - 140px);display:grid;place-items:center;align-content:center;gap:14px;text-align:center}
+.look .bot{width:min(56vw,260px);filter:drop-shadow(0 20px 40px rgba(0,0,0,.4))}
+.look h2{color:#fff;font-size:clamp(1.9rem,1.3rem + 3vw,3rem);font-weight:900}
+.look p{color:#cde6d6;font-size:1.2rem;max-width:34ch}
+
+/* Celebración */
+.party{position:fixed;inset:0;z-index:40;display:grid;place-items:center;background:radial-gradient(circle,rgba(18,61,41,.96),rgba(5,20,13,.98));backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);text-align:center;padding:24px;cursor:pointer}
+.party .in{display:grid;justify-items:center;gap:10px;animation:popin .45s cubic-bezier(.3,1.6,.5,1)}
+.party .bot{width:min(56vw,250px);animation:hop .7s ease-in-out 3}
+.party h2{color:#fff;font-size:clamp(2.2rem,1.4rem + 4vw,3.6rem);font-weight:900;text-shadow:0 0 30px var(--tglow)}
+.party p{color:#ffe08a;font-family:var(--f-display);font-weight:700;font-size:clamp(1.1rem,1rem + 1vw,1.5rem);max-width:30ch}
+.party .stars{font-size:1.2rem}
+@keyframes popin{from{transform:scale(.6);opacity:0}}
+@keyframes hop{50%{transform:translateY(-22px)}}
+.toast{top:calc(84px + env(safe-area-inset-top,0px));bottom:auto;background:var(--card);color:var(--ink);box-shadow:0 10px 30px rgba(0,0,0,.35);font-size:1.05rem;border:3px solid var(--sun)}
+.conn{background:var(--danger);color:#fff}
+
+
+/* Luna, paisaje y camino */
+.moon{position:fixed;bottom:calc(min(34vh,280px) - 10px);right:7vw;width:74px;height:74px;border-radius:50%;z-index:0;pointer-events:none;background:radial-gradient(circle at 34% 32%,#fffdf0,#f7e9b6 58%,#e6cf86);box-shadow:0 0 40px rgba(255,240,190,.5),0 0 120px rgba(255,240,190,.22);animation:moon 6s ease-in-out infinite alternate}
+.moon::before,.moon::after{content:"";position:absolute;border-radius:50%;background:rgba(200,170,90,.35)}
+.moon::before{width:14px;height:14px;left:42px;top:20px}.moon::after{width:9px;height:9px;left:22px;top:44px}
+@keyframes moon{to{transform:translateY(8px);box-shadow:0 0 50px rgba(255,240,190,.6),0 0 140px rgba(255,240,190,.28)}}
+.land{position:fixed;left:0;right:0;bottom:0;height:min(34vh,280px);z-index:0;pointer-events:none}
+.wrap{padding-bottom:min(30vh,240px)}
+.path{position:relative;display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:4px;margin:4px 0 20px;padding:10px 8px 6px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);border-radius:24px}
+.path .track{position:absolute;left:calc(100%/12);right:calc(100%/12);top:33px;height:6px;border-radius:9px;background:rgba(255,255,255,.14);overflow:hidden}
+.path .track i{display:block;height:100%;background:linear-gradient(90deg,var(--sun),var(--tc2));border-radius:9px;transition:width .8s}
+.stn{position:relative;border:0;background:none;color:#cfe6d6;display:grid;justify-items:center;gap:4px;cursor:pointer;font-family:var(--f-display);font-weight:700;padding:0;min-width:0}
+.stn .dot{width:46px;height:46px;border-radius:50%;display:grid;place-items:center;background:#1c4a33;border:3px solid rgba(255,255,255,.25);transition:transform .2s}
+.stn .dot b{font-size:1.05rem;color:#cfe6d6}
+.stn .dot svg{width:26px;height:26px}
+.stn small{font-size:.78rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+.stn.done .dot{background:var(--sun-bg);border-color:var(--sun)}
+.stn.cur .dot{background:radial-gradient(circle at 35% 30%,#fff 0 12%,var(--tc2) 45%,var(--tc));border-color:#fff;box-shadow:0 0 0 5px var(--tglow),0 0 24px var(--tglow);animation:stn 1.6s ease-in-out infinite}
+.stn.cur .dot b{color:#06231a}
+.stn.cur small{color:#fff}
+.stn.next{opacity:.6}
+@keyframes stn{50%{transform:translateY(-5px) scale(1.06)}}
+/* Compañero tocable */
+.botbtn{border:0;background:none;padding:0;cursor:pointer;display:block;position:relative;-webkit-tap-highlight-color:transparent}
+.botbtn::after{content:"¡Tócame!";position:absolute;left:50%;bottom:-6px;transform:translateX(-50%);background:var(--sun);color:#2d2000;font-family:var(--f-display);font-weight:800;font-size:.72rem;border-radius:999px;padding:2px 9px;white-space:nowrap;animation:tapme 2.4s ease-in-out infinite}
+@keyframes tapme{0%,100%{transform:translateX(-50%) scale(1)}50%{transform:translateX(-50%) scale(1.1)}}
+.speech{padding-right:64px}
+#sayTxt{display:block;min-height:2.6em}
+.hear{position:absolute;right:12px;top:50%;transform:translateY(-50%);width:44px;height:44px;border-radius:50%;border:0;background:var(--tsoft);color:var(--tink);display:grid;place-items:center;cursor:pointer}
+.hear svg{width:24px;height:24px}
+.hear:active{transform:translateY(-50%) scale(.9)}
+/* Stickers */
+.m-head.has-st{padding-right:76px}
+.sticker{position:absolute;top:-16px;right:14px;width:84px;height:84px;filter:drop-shadow(0 8px 14px rgba(0,0,0,.22));animation:stick 3.2s ease-in-out infinite alternate;pointer-events:none}
+.sticker svg{width:100%;height:100%;display:block;background:#fff;border-radius:24px;padding:8px;border:3px solid var(--tc)}
+@keyframes stick{from{transform:rotate(-8deg) translateY(0)}to{transform:rotate(6deg) translateY(-6px)}}
+/* Entradas y micro-animaciones */
+.enter .path{animation:drop .6s cubic-bezier(.2,1.4,.4,1) both}
+.enter .buddy{animation:rise .6s .08s cubic-bezier(.2,1.3,.4,1) both}
+.enter .mission{animation:rise .65s cubic-bezier(.2,1.3,.4,1) both}
+.enter .mission:nth-child(1){animation-delay:.18s}.enter .mission:nth-child(2){animation-delay:.3s}.enter .mission:nth-child(3){animation-delay:.42s}.enter .mission:nth-child(4){animation-delay:.54s}
+.enter .doors{animation:rise .6s .14s both}
+@keyframes rise{from{opacity:0;transform:translateY(40px) scale(.96)}}
+@keyframes drop{from{opacity:0;transform:translateY(-24px)}}
+.word[aria-pressed="true"],.face[aria-pressed="true"],.vote button[aria-pressed="true"]{animation:pick .45s cubic-bezier(.3,1.8,.5,1)}
+@keyframes pick{40%{transform:translateY(-6px) scale(1.07)}}
+.magic::after{content:"";position:absolute;inset:0;border-radius:inherit;background:linear-gradient(110deg,transparent 30%,rgba(255,255,255,.55) 45%,transparent 60%);background-size:250% 100%;animation:shine 3.2s ease-in-out infinite;pointer-events:none}
+@keyframes shine{0%,60%{background-position:150% 0}100%{background-position:-60% 0}}
+.magic:disabled::after{display:none}
+.chip-m.ok{animation:stamp .5s cubic-bezier(.3,1.8,.5,1)}
+@keyframes stamp{from{transform:scale(1.8) rotate(-12deg);opacity:0}}
+.tapclose{color:#bfe0cd;font-weight:800}
+.look .bot{width:min(56vw,260px)}
+@media (max-width:760px){
+  .path .track{top:29px}
+  .stn .dot{width:38px;height:38px}
+  .stn small{font-size:.66rem}
+  .sticker{width:62px;height:62px;top:-12px;right:10px}
+  .sticker svg{border-radius:18px;padding:5px}
+  .m-head.has-st{padding-right:58px}
+  .moon{width:48px;height:48px}
+  .moon::before{left:26px;top:12px;width:9px;height:9px}.moon::after{left:13px;top:28px;width:6px;height:6px}
+  .botbtn::after{font-size:.62rem}
+  .speech{padding-right:56px}
+}
+
+@media (max-width:760px){
+  body{font-size:17px}
+  .buddy{grid-template-columns:96px minmax(0,1fr);gap:14px}
+  .buddy .bot{width:96px}
+  .eyes2{grid-template-columns:minmax(0,1fr)}
+  .board .ledgrid{--cs:min(7.4vw,40px);gap:min(1.2vw,6px)}
+  .me b{font-size:1.05rem}
+  .out{padding:7px 10px}
+  .orbs{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .orbbtn .orb{width:min(34vw,150px);height:min(34vw,150px)}
+  .stars span.lbl{display:none}
+  .me small{max-width:46vw}
+  .magic{font-size:1.15rem;padding:14px 22px}
+  .send-row{grid-template-columns:minmax(0,1fr)}
+}
+@media (max-width:420px){
+  .doors .door{font-size:.95rem}
+  .door svg{width:30px;height:30px}
+  .faces{grid-template-columns:repeat(auto-fill,minmax(98px,1fr))}
+}
+</style>
+</head>
+<body>
+<canvas id="fx" aria-hidden="true"></canvas>
+<div class="moon" aria-hidden="true"></div>
+<div class="land" id="land" aria-hidden="true"></div>
+<div id="app"></div>
+<div class="party" id="party" hidden role="status" aria-live="polite"><div class="in" id="partyIn"></div></div>
+<input type="file" id="photo" accept="image/*" capture="environment" hidden>
+<div class="toast" id="toast" role="status"></div>
+<script src="ecobot-nucleo.js"></script>
+<script>
+'use strict';
+const E = Ecobot;
+const $ = (s, r = document) => r.querySelector(s), $$ = (s, r = document) => [...r.querySelectorAll(s)];
+const esc = E.esc;
+const reduced = E.calm;
+const ICON = {
+  check: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7"/></svg>',
+  cam: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg>',
+  send: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12l16-8-6 16-2.5-6.5z"/></svg>',
+  star: '<svg viewBox="0 0 24 24"><path d="M12 2.5l2.9 6 6.6.9-4.8 4.6 1.2 6.5L12 17.4 6.1 20.5l1.2-6.5L2.5 9.4l6.6-.9z" fill="#f2b632" stroke="#e3a313" stroke-width="1"/></svg>',
+  soundOn: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 9v6h4l5 4V5L8 9z" fill="currentColor"/><path d="M16 9a4 4 0 0 1 0 6M18.5 6.5a7.5 7.5 0 0 1 0 11"/></svg>',
+  soundOff: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 9v6h4l5 4V5L8 9z" fill="currentColor"/><path d="M17 9l5 6M22 9l-5 6"/></svg>',
+  left: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>',
+  right: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg>',
+  wave: '<svg viewBox="0 0 40 40"><path d="M14 34V18c0-3 4-3 4 0v6V10c0-3 4-3 4 0v14V11c0-3 4-3 4 0v13V15c0-3 4-3 4 0v12c0 5-4 8-9 8h-2c-4 0-6-2-8-5l-4-7c-1-3 2-4 4-2z" fill="#f2c9a0" stroke="#b07a4e" stroke-width="1.6"/><path d="M8 8l-3-3M11 5l-1-4M5 12l-4-1" stroke="#f2b632" stroke-width="2.4" stroke-linecap="round"/></svg>',
+  bubble: '<svg viewBox="0 0 40 40"><path d="M6 8h28a3 3 0 0 1 3 3v15a3 3 0 0 1-3 3H17l-8 7v-7H6a3 3 0 0 1-3-3V11a3 3 0 0 1 3-3z" fill="#33d1b3"/><path d="M11 16h18M11 22h12" stroke="#0b2a1c" stroke-width="2.6" stroke-linecap="round"/></svg>',
+  bolt: '<svg viewBox="0 0 40 40"><rect x="3" y="7" width="34" height="26" rx="6" fill="#0b1f1c"/><text x="8" y="19" font-size="7.5" font-weight="900" fill="#f2b632" font-family="Poppins, sans-serif">SI</text><text x="8" y="29" font-size="6.5" font-weight="900" fill="#33d1b3" font-family="Poppins, sans-serif">ENTONCES</text></svg>'
+};
+const STAR_SLOT = '<svg viewBox="0 0 24 24"><path d="M12 2.5l2.9 6 6.6.9-4.8 4.6 1.2 6.5L12 17.4 6.1 20.5l1.2-6.5L2.5 9.4l6.6-.9z"/></svg>';
+
+let S = null, me = null, painting = false, pendingState = null, connState = '';
+let ui = { traits: null, m5: 'msg', mFace: 'feliz', rFace: 'feliz', rSit: E.SITS[0].t, face: null, sit: 0 };
+let robot = null, dir = null, login = { team: null, code: '', err: '' }, lastStars = null;
+let sound = true; try { sound = localStorage.getItem('ecobot-sonido') !== 'no'; } catch (e) { }
+
+try { const saved = JSON.parse(localStorage.getItem('ecobot-escuadron') || 'null'); if (saved && E.team(saved.team)) me = saved; } catch (e) { }
+const q = new URLSearchParams(location.search).get('equipo'); if (q && E.team(q) && (!me || E.team(q).id !== me.team)) { me = null; login.team = E.team(q).id; }
+
+const conn = E.connect(onState, st => { connState = st; const c = $('#connBadge'); if (c) c.hidden = st !== 'offline'; });
+const act = a => conn.dispatch(Object.assign({ team: me && me.team }, a));
+
+/* ---------- Colores, paisaje y partículas del escuadrón ---------- */
+const hexA = (h, a) => { const n = parseInt(h.slice(1), 16); return `rgba(${n >> 16},${(n >> 8) & 255},${n & 255},${a})`; };
+const LIGHT = { agua: '#8cc8f2', aire: '#9ae0ea', tierra: '#d9a76f', energia: '#ffd56b' };
+E.soundOn = sound;
+const sfx = E.sfx;
+const FX = E.fx($('#fx'));
+function paintTeam(t) {
+  const r = document.documentElement.style, land = $('#land'), key = t ? t.key : 'mix';
+  if (!t) { r.setProperty('--tc', '#33d1b3'); r.setProperty('--tc2', '#7fe6d2'); r.setProperty('--tsoft', '#e0f7f2'); r.setProperty('--tink', '#13584b'); r.setProperty('--tglow', 'rgba(51,209,179,.45)'); FX.mode = 'mix'; }
+  else { r.setProperty('--tc', t.c); r.setProperty('--tc2', LIGHT[t.key]); r.setProperty('--tsoft', t.soft); r.setProperty('--tink', t.ink); r.setProperty('--tglow', hexA(t.c, .5)); FX.mode = t.key; }
+  if (land.dataset.k !== key) { land.innerHTML = E.landscape(key); land.dataset.k = key; }
+}
+function burst(cx, cy, n = 60) {
+  const t = me && E.team(me.team);
+  FX.burst(cx, cy, n, ['#f2b632', '#33d1b3', '#ffffff', t ? t.c : '#5fbf5a', t ? LIGHT[t.key] : '#7fe6d2', '#ff9bbd']);
+}
+
+/* ---------- Celebración ---------- */
+let partyT = null;
+function celebrate(title, text, face) {
+  sfx.win();
+  const p = $('#party'), inn = $('#partyIn'), n = starCount();
+  inn.innerHTML = `<div class="bot" id="partyBot"></div><h2>${esc(title)}</h2><p>${esc(text)}</p><span class="stars">${ICON.star}<span>${n} ${n === 1 ? 'estrella' : 'estrellas'}</span></span><small class="tapclose">Toquen para seguir</small>`;
+  const r = E.mountRobot($('#partyBot')); const f = face || (S && S.faces.feliz) || { L: E.P.feliz, R: E.P.feliz }; r.draw(f.L, f.R); r.sprout(1.15);
+  p.hidden = false; r.cheer(3200); r.talk(1400); setTimeout(() => r.hearts(7), 300);
+  burst(innerWidth / 2, innerHeight * .45, 90); setTimeout(() => burst(innerWidth * .2, innerHeight * .3, 40), 250); setTimeout(() => burst(innerWidth * .8, innerHeight * .3, 40), 450);
+  clearTimeout(partyT); partyT = setTimeout(closeParty, 3600);
+}
+function closeParty() { $('#party').hidden = true; }
+$('#party').onclick = closeParty;
+function toast(t, bad) { if (bad) sfx.oops(); const el = $('#toast'); el.textContent = t; el.classList.add('show'); clearTimeout(toast.t); toast.t = setTimeout(() => el.classList.remove('show'), 2600); }
+
+/* ---------- Estrellas ---------- */
+function starCount() {
+  if (!S || !me) return 0; const t = me.team; let n = 0;
+  if (S.ready[t]) n++; if ((S.traits[t] || []).length === 3) n++; if (S.names.some(x => x.team === t && x.sq)) n++; if (S.squadVotes[t]) n++;
+  if (E.sentFace(S, t)) n++; if (E.SITS.every(s => (S.stateVotes[s.id] || {})[t])) n++;
+  if (S.welcome.some(w => w.team === t)) n++; n += Math.min(3, S.messages.filter(m => m.team === t).length); if (S.rules.some(r => r.team === t)) n++; if (S.evalTeam[t]) n++;
+  return n;
+}
+
+/* ---------- Compañero (Ecobot que vive en la tableta) ---------- */
+let buddyHost = null, drawingMode = false, lookT = null, giggleT = null, sayKey = null, typeIv = null, sayText = '';
+function ensureRobot() {
+  if (!buddyHost) {
+    buddyHost = document.createElement('div'); robot = E.mountRobot(buddyHost); dir = E.director(robot, {});
+    E.antics(robot, { quiet: true, first: 6000, mood: () => S ? { asleep: !S.awake, energy: E.energyOf(S.moment) } : { asleep: true, energy: 1 }, paused: () => drawingMode || painting || !$('#party').hidden });
+    E.hoverReact(robot, { isAsleep: () => S && !S.awake, onWake: () => { typeSay('¿Eh? ¿Quién me despertó? ¡Hola!', true); setTimeout(() => dir && !drawingMode && dir.base(), 2400); }, onScare: () => typeSay('¡Ay! ¡Me asustaste!', true) });
+  }
+  return buddyHost;
+}
+function typeSay(text, animate) {
+  sayText = text; const el = $('#sayTxt'); if (!el) return;
+  clearInterval(typeIv);
+  if (!animate || reduced) { el.textContent = text; return; }
+  el.textContent = ''; let i = 0; robot && robot.talk(text.length * 32 + 300);
+  typeIv = setInterval(() => { i += 1; el.textContent = text.slice(0, i); if (i >= text.length) clearInterval(typeIv); }, 30);
+}
+function hear() {
+  if (!sayText) return;
+  const ok = E.speak(sayText, { onstart: () => robot && robot.talk(60000), onend: () => robot && robot.hush() });
+  if (!ok) toast('Este equipo no tiene voz. Lean el mensaje en voz alta.');
+}
+const GIGGLES = ['¡Jiji! ¡Me haces cosquillas!', '¡Bip bup! ¡Hola, amigos!', '¡Me encanta trabajar con ustedes!', '¿Sabían que reciclar me pone feliz?', '¡Choca esos cinco!', '¡Cuidemos el planeta juntos!', '¡Uy! ¡Qué buenas ideas tienen!'];
+function giggle() {
+  if (!robot) return;
+  const msg = GIGGLES[Math.random() * GIGGLES.length | 0], f = S.faces[Math.random() < .5 ? 'amor' : 'feliz'] || S.faces.feliz;
+  robot.stop(); robot.draw(f.L, f.R); robot.sleep(false); if (!robot.trick(['dance', 'spin', 'toss', 'headspin', 'apart'][Math.random() * 5 | 0])) robot.wiggle(); robot.wave(1800); robot.hearts(4); sfx.giggle();
+  typeSay(msg, true); if (E.soundOn) E.speak(msg, { onstart: () => robot.talk(8000), onend: () => robot.hush() });
+  burst(...centerOf(buddyHost), 16);
+  clearTimeout(giggleT); giggleT = setTimeout(() => { if (drawingMode && ui.face) robot.draw(ui.face.L, ui.face.R); else if (dir) dir.base(); }, 2400);
+}
+document.addEventListener('pointerdown', e => {
+  if (!robot || !buddyHost || !buddyHost.isConnected || e.target.closest('.cell')) return;
+  const r = buddyHost.getBoundingClientRect(), dx = e.clientX - (r.left + r.width / 2);
+  robot.look(dx > 60 ? 1 : dx < -60 ? -1 : 0); clearTimeout(lookT); lookT = setTimeout(() => robot.look(0), 1300);
+}, true);
+
+/* ---------- Estado ---------- */
+function onState(s, changed) {
+  if (painting) { pendingState = [s, changed]; return; }
+  const first = !S; S = s;
+  if (me && S.pins[me.team] !== me.pin) { logout(); toast('Las claves cambiaron. Pidan la nueva clave a su guía.', true); return; }
+  if (dir && !drawingMode) dir.handle(S);
+  if (first || [...changed].some(k => !['presence', 'screen', 'v'].includes(k))) render();
+}
+setInterval(() => { if (me && S) act({ type: 'ping' }); }, 15000);
+function logout() { me = null; try { localStorage.removeItem('ecobot-escuadron'); } catch (e) { } ui.face = null; sayKey = null; render(); }
+
+/* ---------- Ilustraciones ---------- */
+const STICKER = {
+  m1: '<svg viewBox="0 0 64 64"><circle cx="32" cy="35" r="20" fill="#f2b632" stroke="#7a5600" stroke-width="3"/><circle cx="32" cy="35" r="14" fill="#fff8e1"/><path d="M32 26v10l7 4" stroke="#173024" stroke-width="3" stroke-linecap="round" fill="none"/><circle cx="16" cy="15" r="7" fill="#f2b632" stroke="#7a5600" stroke-width="3"/><circle cx="48" cy="15" r="7" fill="#f2b632" stroke="#7a5600" stroke-width="3"/><path d="M20 55l-4 5M44 55l4 5" stroke="#7a5600" stroke-width="3" stroke-linecap="round"/></svg>',
+  m2: '<svg viewBox="0 0 64 64"><rect x="8" y="22" width="40" height="28" rx="6" fill="#fff" stroke="#1e5b3a" stroke-width="3"/><circle cx="16" cy="36" r="3" fill="#1e5b3a"/><path d="M24 32h16M24 40h10" stroke="#33d1b3" stroke-width="3" stroke-linecap="round"/><path d="M40 52l18-18" stroke="#7a5600" stroke-width="4" stroke-linecap="round"/><path d="M57 10l2 5 5 2-5 2-2 5-2-5-5-2 5-2z" fill="#f2b632"/><path d="M46 6l1.4 3.4 3.4 1.4-3.4 1.4L46 15.6l-1.4-3.4-3.4-1.4 3.4-1.4z" fill="#ff9bbd"/></svg>',
+  m3: '<svg viewBox="0 0 64 64"><rect x="6" y="10" width="44" height="44" rx="10" fill="#0b1f1c" stroke="#33d1b3" stroke-width="2.5"/>' + [0, 1, 2, 3].map(r => [0, 1, 2, 3].map(c => `<circle cx="${16 + c * 8}" cy="${20 + r * 8}" r="3" fill="${[[0, 1, 1, 0], [1, 0, 0, 1], [1, 0, 0, 1], [0, 1, 1, 0]][r][c] ? '#33d1b3' : '#1e3b36'}"/>`).join('')).join('') + '<path d="M44 58l14-26" stroke="#a8723d" stroke-width="5" stroke-linecap="round"/><path d="M56 34l4-8" stroke="#f2b632" stroke-width="6" stroke-linecap="round"/></svg>',
+  m4: '<svg viewBox="0 0 64 64"><path d="M8 30L32 14l24 16v26H8z" fill="#fff8e1" stroke="#a8723d" stroke-width="3"/><rect x="26" y="40" width="12" height="16" fill="#3d9be0"/><rect x="13" y="34" width="9" height="9" fill="#9ae0ea"/><rect x="42" y="34" width="9" height="9" fill="#9ae0ea"/><path d="M32 14V4" stroke="#7a5600" stroke-width="2.5"/><path d="M32 4h12l-3 4 3 4H32z" fill="#33d1b3"/></svg>',
+  m5: '<svg viewBox="0 0 64 64"><path d="M6 10h34a4 4 0 0 1 4 4v18a4 4 0 0 1-4 4H20l-9 8v-8H6a4 4 0 0 1-4-4V14a4 4 0 0 1 4-4z" fill="#33d1b3"/><path d="M12 20h22M12 27h14" stroke="#0b2a1c" stroke-width="3" stroke-linecap="round"/><path d="M30 30h26a4 4 0 0 1 4 4v14a4 4 0 0 1-4 4h-4v8l-9-8H30a4 4 0 0 1-4-4V34a4 4 0 0 1 4-4z" fill="#f2b632"/><circle cx="36" cy="41" r="2.6" fill="#7a5600"/><circle cx="44" cy="41" r="2.6" fill="#7a5600"/><circle cx="52" cy="41" r="2.6" fill="#7a5600"/></svg>',
+  m6: '<svg viewBox="0 0 64 64"><path d="M4 46h56" stroke="#5fbf5a" stroke-width="4" stroke-linecap="round"/><circle cx="32" cy="44" r="14" fill="#f2b632"/>' + [0, 30, 60, 90, 120, 150, 180].map(a => { const r = a * Math.PI / 180; return `<path d="M${32 - Math.cos(r) * 19} ${44 - Math.sin(r) * 19}L${32 - Math.cos(r) * 27} ${44 - Math.sin(r) * 27}" stroke="#f2b632" stroke-width="3.5" stroke-linecap="round"/>`; }).join('') + '<rect x="0" y="46" width="64" height="18" fill="#1e6a3d"/><path d="M20 54h24" stroke="#5fbf5a" stroke-width="3" stroke-linecap="round"/></svg>'
+};
+const STATIONS = E.MOMS.filter(m => m.id !== 'pausa');
+const STN_ICON = { m1: 'Hola', m2: 'Nombre', m3: 'Caras', m4: 'Sentir', m5: 'Hablar', m6: '¡Despierta!' };
+function pathHTML(m) {
+  const order = E.MOMS.map(x => x.id), cur = order.indexOf(m.id);
+  return `<nav class="path" aria-label="Camino de misiones"><div class="track"><i style="width:${Math.max(0, Math.min(100, (STATIONS.findIndex(s => order.indexOf(s.id) >= cur) / (STATIONS.length - 1)) * 100))}%"></i></div>
+    ${STATIONS.map(s => { const k = order.indexOf(s.id), st = k < cur ? 'done' : s.id === m.id ? 'cur' : 'next'; return `<button class="stn ${st}" type="button" data-stn="${s.id}" aria-label="${esc(s.kid)}"><span class="dot">${st === 'done' ? ICON.star : `<b>${s.n}</b>`}</span><small>${STN_ICON[s.id]}</small></button>`; }).join('')}</nav>`;
+}
+
+/* ---------- Pantallas ---------- */
+const BUDDY = {
+  m1: t => `¡Hola, Escuadrón ${t}! Estoy dormido… ¿me ayudan a despertar?`,
+  m2: () => 'Elijan 3 palabras mágicas que digan cómo soy y denme un nombre.',
+  m3: () => '¡Dibújenme una cara nueva! Prendan mis luces una por una.',
+  m4: () => 'Miren lo que pasa en el colegio. ¿Qué cara pongo?',
+  m5: () => 'Enséñenme a hablar. ¡Yo lo diré en la pantalla grande!',
+  m6: () => '¡Digan mi nombre todos juntos para despertarme!'
+};
+let lastMoment = null;
+function render() {
+  const app = $('#app');
+  if (!S) { paintTeam(null); app.innerHTML = '<div class="look"><div class="bot" id="robotMini"></div><p>Buscando al Ecobot…</p></div>'; const r = E.mountRobot($('#robotMini')); r.draw(E.P.dormido, E.P.dormido); r.sleep(true); return; }
+  if (!me) { renderLogin(); return; }
+  const t = E.team(me.team); paintTeam(t);
+  const m = E.mom(S.moment), paused = S.locked || m.id === 'pausa';
+  const n = starCount(), entering = lastMoment !== m.id + (paused ? 'p' : '');
+  lastMoment = m.id + (paused ? 'p' : '');
+  const say = (BUDDY[m.id] || BUDDY.m1)(t.id), newSay = sayKey !== m.id + t.id;
+  E.keepInputs(app, () => {
+    app.innerHTML = `<header class="bar"><div class="bar-in"><div class="me"><span class="orb">${E.teamIcon(t)}</span><div><b>Escuadrón ${esc(t.id)}</b><small>${m.n === 'P' ? 'Pausa activa' : 'Momento ' + m.n + ' · ' + esc(m.kid)}</small></div></div>
+      <div class="bar-r"><span class="conn offline" id="connBadge" ${connState === 'offline' ? '' : 'hidden'}><i></i>Sin conexión</span><span class="stars ${lastStars !== null && n > lastStars ? 'bump' : ''}" title="Estrellas ganadas">${ICON.star}<span>${n}</span><span class="lbl">${n === 1 ? 'estrella' : 'estrellas'}</span></span>
+      <button class="ibtn" id="snd" type="button" aria-label="${sound ? 'Apagar sonidos' : 'Prender sonidos'}">${sound ? ICON.soundOn : ICON.soundOff}</button><button class="out" id="out" type="button">Salir</button></div></div></header>
+      <main class="wrap ${entering ? 'enter' : ''}" id="main">${paused ? lookView(m) : `${pathHTML(m)}<section class="buddy"><button class="botbtn" id="botBtn" type="button" aria-label="Tocar al Ecobot"><div class="bot" id="robotSlot"></div></button><div class="speech"><small>El Ecobot dice</small><span id="sayTxt"></span><button class="hear" id="hearBtn" type="button" aria-label="Escuchar al Ecobot">${ICON.soundOn}</button></div></section>${(VIEWS[m.id] || VIEWS.m1).html()}`}</main>`;
+    lastStars = n;
+    $('#snd').onclick = () => { sound = !sound; E.soundOn = sound; try { localStorage.setItem('ecobot-sonido', sound ? 'si' : 'no'); } catch (e) { } if (sound) sfx.tap(); else try { speechSynthesis.cancel(); } catch (_) { } render(); };
+    $('#out').onclick = e => { const b = e.currentTarget; if (b.classList.contains('sure')) logout(); else { b.classList.add('sure'); b.textContent = '¿Salir? Toca otra vez'; setTimeout(() => { if (b.isConnected) { b.classList.remove('sure'); b.textContent = 'Salir'; } }, 3000); } };
+    const slot = $('#robotSlot');
+    const wasDrawing = drawingMode; drawingMode = m.id === 'm3' && !paused;
+    if (slot) { const h = ensureRobot(); h.className = 'bot'; slot.replaceWith(h); robot.sprout(E.sproutScale(S)); if (!drawingMode) { if (wasDrawing) dir.base(); dir.handle(S); } }
+    if (!paused) {
+      typeSay(say, newSay); sayKey = m.id + t.id;
+      $('#botBtn').onclick = giggle; $('#hearBtn').onclick = hear;
+      $$('[data-stn]').forEach(b => b.onclick = () => {
+        const order = E.MOMS.map(x => x.id), k = order.indexOf(b.dataset.stn), cur = order.indexOf(m.id); sfx.pop();
+        typeSay(k < cur ? '¡Esa misión ya la cumplieron! Ganaron una estrella.' : k === cur ? '¡Aquí estamos! Esta es la misión de ahora.' : 'Esa misión viene pronto. ¡Sorpresa!', true);
+        robot.hop(); burst(...centerOf(b), 10);
+      });
+      (VIEWS[m.id] || VIEWS.m1).bind();
+    }
+  });
+}
+function lookView(m) {
+  return `<div class="look"><div class="bot" id="robotSlot"></div><h2>¡Miren la pantalla grande!</h2><p>${m.id === 'pausa' ? 'Es la pausa activa: hagan solo lo que diga «El Ecobot dice».' : 'Escuchen al moderador: ya viene la siguiente misión.'}</p></div>`;
+}
+const head = (n, title, ok, sticker) => `<div class="m-head ${sticker ? 'has-st' : ''}"><span class="chip-m ${ok ? 'ok' : ''}">${ok ? ICON.check + '¡Cumplida!' : 'Misión ' + n}</span><h2>${title}</h2></div>${sticker && STICKER[sticker] ? `<span class="sticker" aria-hidden="true">${STICKER[sticker]}</span>` : ''}`;
+
+/* ---------- Entrada ---------- */
+function renderLogin() {
+  const app = $('#app');
+  if (!login.team) {
+    paintTeam(null);
+    app.innerHTML = `<main class="wrap gate"><div class="bot" id="gateBot"></div><h1>¡Bienvenidos, Escuadrones Verdes!</h1><p>Toquen la esfera de su escuadrón para entrar.</p>
+      <div class="orbs">${E.TEAMS.map(t => `<button class="orbbtn" type="button" data-team="${t.id}" style="--tc:${t.c};--tc2:${LIGHT[t.key]};--tglow:${hexA(t.c, .55)}"><span class="orb">${E.teamIcon(t)}</span>${t.id}</button>`).join('')}</div></main>`;
+    const r = E.mountRobot($('#gateBot')); r.draw(E.P.feliz, E.P.feliz); r.sprout(.9);
+    $$('[data-team]').forEach(b => b.onclick = () => { sfx.tap(); login = { team: b.dataset.team, code: '', err: '' }; render(); });
+    return;
+  }
+  const t = E.team(login.team); paintTeam(t);
+  app.innerHTML = `<main class="wrap gate"><div class="padbox" id="padbox"><h2><span class="orb">${E.teamIcon(t)}</span>Escuadrón ${t.id}</h2><p style="color:var(--muted);margin:0 auto">Escriban la clave mágica que les dio su guía.</p>
+    <div class="pindots" aria-label="${login.code.length} de 4 números">${[0, 1, 2, 3].map(i => `<i class="${i < login.code.length ? 'f' : ''}"></i>`).join('')}</div>
+    <p class="err" role="alert">${esc(login.err)}</p>
+    <div class="keys">${[1, 2, 3, 4, 5, 6, 7, 8, 9].map(n => `<button type="button" data-k="${n}">${n}</button>`).join('')}<button type="button" class="w" data-k="del">Borrar</button><button type="button" data-k="0">0</button><button type="button" class="w go" data-k="ok">Entrar</button></div>
+    <button class="link" id="back" type="button">Elegir otro escuadrón</button></div></main>`;
+  const press = k => {
+    sfx.key();
+    if (k === 'del') login.code = login.code.slice(0, -1);
+    else if (k === 'ok') return check();
+    else if (login.code.length < 4) login.code += k;
+    login.err = ''; if (login.code.length === 4) return check(); render();
+  };
+  function check() {
+    if (S.pins[login.team] === login.code) {
+      me = { team: login.team, pin: login.code }; try { localStorage.setItem('ecobot-escuadron', JSON.stringify(me)); } catch (e) { }
+      login = { team: null, code: '', err: '' }; act({ type: 'ping' }); render(); celebrate('¡Entraron!', `Bienvenido, Escuadrón ${me.team}. El Ecobot los estaba esperando.`);
+    } else { login.code = ''; login.err = 'Esa no es la clave. Pídansela a su guía.'; sfx.oops(); render(); $('#padbox').classList.add('shake'); }
+  }
+  $$('[data-k]').forEach(b => b.onclick = () => press(b.dataset.k));
+  $('#back').onclick = () => { login = { team: null, code: '', err: '' }; render(); };
+  document.onkeydown = e => { if (me || !login.team) return; if (/^[0-9]$/.test(e.key)) press(e.key); else if (e.key === 'Backspace') press('del'); else if (e.key === 'Enter') press('ok'); };
+}
+
+/* ---------- Ayudas ---------- */
+const allFaces = () => Object.keys(S.faces).filter(k => k !== 'abierto');
+const facePick = (sel, attr, list = allFaces()) => `<div class="faces">${list.map(k => `<button type="button" class="face" ${attr}="${k}" aria-pressed="${sel === k}">${E.faceSVG(S.faces[k])}<span>${esc(S.faces[k].label)}</span></button>`).join('')}</div>`;
+function wordDots(text) { const n = E.words(text); return `<span>${n} de 12 palabras</span>` + Array.from({ length: 12 }, (_, i) => `<i class="${i < n ? 'f' : ''}"></i>`).join('') + (n > 12 ? '<i class="x"></i>' : ''); }
+function bindWords(inp, out, tip) { const u = () => { out.innerHTML = wordDots(inp.value); if (tip) tip.hidden = !E.NEG.test(inp.value); }; inp.oninput = u; u(); }
+const centerOf = el => { const r = el.getBoundingClientRect(); return [r.left + r.width / 2, r.top + r.height / 2]; };
+function pick(el) { sfx.tap(); if (el) burst(...centerOf(el), 14); }
+
+/* ---------- Misiones ---------- */
+const VIEWS = {};
+VIEWS.m1 = {
+  html: () => `<div class="missions"><section class="mission" style="justify-items:center;text-align:center">${head(1, '¡Despierten al equipo!', S.ready[me.team], 'm1')}
+    <p class="say">Cuando todo su escuadrón esté sentado y listo, toquen el botón mágico.</p>
+    ${S.ready[me.team] ? `<div class="done">${ICON.check}¡Están listos! Esperen la siguiente misión.</div>` : `<button class="bigbtn" id="ready" type="button">¡Estamos listos!</button>`}</section></div>`,
+  bind() { const b = $('#ready'); if (b) b.onclick = () => { act({ type: 'ready' }); celebrate('¡Misión cumplida!', 'Miren la pantalla grande: el Ecobot ya sabe que están listos.'); }; }
+};
+VIEWS.m2 = {
+  html: () => {
+    const sent = S.traits[me.team] || [];
+    if (!ui.traits) ui.traits = [...sent];
+    const mineNames = S.names.filter(n => n.team === me.team && n.sq).map(n => n.name);
+    const my = S.squadVotes[me.team];
+    return `<div class="missions">
+    ${S.official ? `<section class="mission" style="text-align:center"><p class="say" style="margin:0 auto">¡El Ecobot ya tiene nombre!</p><p class="namebig">${esc(S.official)}</p>${S.nickname ? `<p class="say" style="margin:0 auto">Sus amigos le dicen <b>${esc(S.nickname)}</b></p>` : ''}</section>` : ''}
+    <section class="mission">${head(1, 'Escojan 3 palabras mágicas', sent.length === 3, 'm2')}
+      <div class="words">${E.ADJ.map(a => `<button class="word" type="button" data-adj="${a}" aria-pressed="${ui.traits.includes(a)}">${a}</button>`).join('')}</div>
+      <div class="row" style="justify-content:space-between"><span class="slots">${[0, 1, 2].map(i => `<i class="${i < ui.traits.length ? 'on' : ''}">${STAR_SLOT}</i>`).join('')}</span>
+      <button class="magic" id="sendTraits" type="button" ${ui.traits.length === 3 ? '' : 'disabled'}>${ICON.send}Enviar palabras</button></div>
+      ${sent.length === 3 ? `<div class="done">${ICON.check}Enviaron: ${esc(sent.join(', '))}</div>` : ''}</section>
+    <section class="mission">${head(2, 'Inventen 2 nombres', mineNames.length > 0)}
+      <p class="tip">Corto, fácil de decir y que hable de la naturaleza o el reciclaje.</p>
+      <input class="inp" id="n1" maxlength="24" placeholder="Primer nombre" autocomplete="off">
+      <input class="inp" id="n2" maxlength="24" placeholder="Segundo nombre" autocomplete="off">
+      <div><button class="magic" id="sendNames" type="button">${ICON.send}Enviar nombres</button></div>
+      ${mineNames.length ? `<div class="done">${ICON.check}Propusieron: ${esc(mineNames.join(' y '))}</div>` : ''}</section>
+    <section class="mission ${S.voteOpen ? '' : 'off'}">${head(3, '¡A votar!', !!my)}
+      ${S.voteOpen ? `<p class="say">Toquen el nombre que más les gusta. Su escuadrón tiene 1 voto.</p><div class="vote">${S.names.map(n => `<button type="button" data-vote="${n.id}" aria-pressed="${my === n.id}"><span>${esc(n.name)}</span><small>Escuadrón ${esc(n.team)}</small></button>`).join('') || '<p class="note">Todavía no hay nombres.</p>'}</div>`
+        : `<p class="note">La votación se abre cuando el moderador lo diga.</p>`}</section></div>`;
+  },
+  bind() {
+    $$('[data-adj]').forEach(b => b.onclick = () => { const a = b.dataset.adj; if (ui.traits.includes(a)) ui.traits = ui.traits.filter(x => x !== a); else if (ui.traits.length < 3) { ui.traits.push(a); pick(b); } else { toast('Solo 3 palabras. Quiten una primero.', true); return; } render(); });
+    $('#sendTraits').onclick = () => { act({ type: 'traits', traits: ui.traits }); celebrate('¡Palabras enviadas!', 'El Ecobot las está diciendo en la pantalla grande.'); };
+    $('#sendNames').onclick = () => { const a = $('#n1').value.trim(), b = $('#n2').value.trim(); if (!a && !b) { toast('Escriban al menos un nombre', true); return; } $('#n1').value = ''; $('#n2').value = ''; act({ type: 'propose', names: [a, b].filter(Boolean) }); celebrate('¡Nombres enviados!', `Propusieron ${E.joinY([a, b].filter(Boolean))}.`); };
+    $$('[data-vote]').forEach(b => b.onclick = () => { const first = !S.squadVotes[me.team]; act({ type: 'vote', id: b.dataset.vote }); if (first) celebrate('¡Votaron!', 'Pueden cambiar su voto mientras la votación siga abierta.'); else pick(b); });
+  }
+};
+VIEWS.m3 = {
+  html: () => {
+    const asg = S.assign[me.team], f = S.faces[asg];
+    if (!f) return `<div class="missions"><section class="mission"><p class="say">Esperen: el moderador les va a dar una emoción.</p></section></div>`;
+    if (!ui.face || ui.face.from !== asg) { const mine = E.sentFace(S, me.team), src = mine ? S.faces[mine] : f; ui.face = { from: asg, L: [...src.L], R: [...src.R], name: src.label }; }
+    const sent = E.sentFace(S, me.team);
+    const eye = (k, label) => `<div class="board"><b>${label}</b><div class="ledgrid" id="g${k}"></div><button class="soft" type="button" data-photo="${k}">${ICON.cam}Foto de este ojo</button></div>`;
+    return `<div class="missions">
+    <section class="mission">${head(1, '¿Cómo se llama su emoción?', false, 'm3')}
+      <input class="inp huge" id="emoName" maxlength="20" value="${esc(ui.face.name)}" autocomplete="off" aria-label="Nombre de la emoción">
+      <p class="say">El moderador les sugiere <b>${esc(f.label)}</b>. Pueden dejarla o inventar otra, como «Enojado», «Con sueño» o «Enamorado».</p></section>
+    <section class="mission">${head(2, 'Dibujen los dos ojos', false)}
+      <p class="say">Toquen los círculos para prender las luces. Pueden arrastrar el dedo para pintar.</p>
+      <div class="eyes2">${eye('L', 'Ojo izquierdo')}${eye('R', 'Ojo derecho')}</div>
+      <div class="row"><button class="soft" id="copyLR" type="button">Copiar el izquierdo al derecho (espejo)</button><button class="soft" id="clear" type="button">Borrar los dos</button></div>
+      <p class="tip" id="photoMsg" hidden></p></section>
+    <section class="mission">${head(3, '¡Denle vida!', !!sent)}
+      <p class="say">Miren arriba: así se ve el Ecobot con su cara <b id="emoEcho">${esc(ui.face.name)}</b>.</p>
+      <div><button class="magic" id="sendFace" type="button">${ICON.send}¡Enviar al Ecobot!</button></div>
+      ${sent ? `<div class="done">${ICON.check}Su cara «${esc(S.faces[sent].label)}» ya está en el Ecobot. Pueden mejorarla y enviarla otra vez.</div>` : ''}</section></div>`;
+  },
+  bind() {
+    if (!S.faces[S.assign[me.team]]) return;
+    const F = ui.face;
+    const preview = () => { if (robot) { robot.stop(); robot.draw(F.L, F.R); robot.sleep(false); } };
+    const opt = { labels: false, onStart: () => { painting = true; sfx.tap(); }, onEnd: () => { painting = false; const p = pendingState; pendingState = null; if (p) onState(p[0], p[1]); } };
+    const refL = E.makeGrid($('#gL'), () => F.L, (r, c, v) => { F.L = E.setBit(F.L, r, c, v); preview(); }, opt);
+    const refR = E.makeGrid($('#gR'), () => F.R, (r, c, v) => { F.R = E.setBit(F.R, r, c, v); preview(); }, opt);
+    preview();
+    $('#emoName').oninput = e => { F.name = e.target.value; $('#emoEcho').textContent = F.name.trim() || '…'; };
+    $('#copyLR').onclick = e => { F.R = E.mirror(F.L); refR(); preview(); pick(e.currentTarget); };
+    $('#clear').onclick = () => { F.L = E.EMPTY(); F.R = E.EMPTY(); refL(); refR(); preview(); sfx.tap(); };
+    $('#sendFace').onclick = () => {
+      const name = F.name.trim();
+      if (!name) { toast('Escriban el nombre de la emoción', true); $('#emoName').focus(); return; }
+      if (!(F.L.join('') + F.R.join('')).includes('1')) { toast('Prendan algunas luces primero', true); return; }
+      act({ type: 'face', L: F.L, R: F.R, label: name });
+      celebrate('¡Cobró vida!', `Miren la pantalla grande: el Ecobot tiene la cara ${name}.`, { L: F.L, R: F.R });
+    };
+    $$('[data-photo]').forEach(b => b.onclick = () => {
+      const eye = b.dataset.photo, p = $('#photo'); p.value = '';
+      p.onchange = () => readPhoto(p.files[0], rows => { F[eye] = rows; (eye === 'L' ? refL : refR)(); preview(); burst(...centerOf($('#g' + eye)), 30); sfx.win(); }, eye === 'L' ? 'izquierdo' : 'derecho');
+      p.click();
+    });
+  }
+};
+function readPhoto(file, done, eyeName) {
+  const msg = $('#photoMsg'); if (!file) return;
+  msg.hidden = false; msg.textContent = 'Leyendo la hoja…';
+  E.loadImageFile(file).then(img => {
+    const sc = E.toScanImage(img), corners = E.detectMarkers(sc.canvas);
+    if (!corners) { sfx.oops(); msg.textContent = 'No vi los 4 cuadros negros. Tomen la foto otra vez desde arriba, con buena luz. Si no funciona, pidan ayuda a su guía.'; return; }
+    const rows = E.sampleGrid(sc, corners, E.INSET, 0);
+    if (!rows) { msg.textContent = 'No pude leer la hoja. Intenten otra vez.'; return; }
+    done(rows); msg.textContent = `¡Leí la hoja del ojo ${eyeName}! Revisen las luces antes de enviar.`;
+  }, () => { msg.textContent = 'No pude abrir esa foto. Intenten otra vez.'; });
+}
+VIEWS.m4 = {
+  html: () => {
+    const mine = Object.fromEntries(E.SITS.map(s => [s.id, (S.stateVotes[s.id] || {})[me.team]]));
+    const n = Object.values(mine).filter(Boolean).length, i = Math.max(0, Math.min(E.SITS.length - 1, ui.sit)), s = E.SITS[i];
+    return `<div class="missions"><section class="mission">${head(1, `Situación ${i + 1} de ${E.SITS.length}`, n === E.SITS.length, 'm4')}
+      <div class="sitnav"><button class="arrow" id="prev" type="button" aria-label="Situación anterior" ${i === 0 ? 'disabled' : ''}>${ICON.left}</button>
+        <div class="dots">${E.SITS.map((x, k) => `<button type="button" data-go="${k}" class="${mine[x.id] ? 'ok' : ''} ${k === i ? 'cur' : ''}" aria-label="Situación ${k + 1}"></button>`).join('')}</div>
+        <button class="arrow" id="next" type="button" aria-label="Situación siguiente" ${i === E.SITS.length - 1 ? 'disabled' : ''}>${ICON.right}</button></div>
+      <div class="sitart">${E.sitArt(s)}</div>
+      <h2 style="font-family:var(--f-display);font-size:clamp(1.4rem,1.1rem + 1.4vw,2rem);color:var(--ink);text-align:center">${s.t}</h2>
+      <p class="say" style="text-align:center;margin:0 auto">¿Qué cara pone el Ecobot?</p>
+      ${facePick(mine[s.id], 'data-sv')}</section></div>`;
+  },
+  bind() {
+    const s = E.SITS[Math.max(0, Math.min(E.SITS.length - 1, ui.sit))];
+    $('#prev').onclick = () => { ui.sit--; render(); };
+    $('#next').onclick = () => { ui.sit++; render(); };
+    $$('[data-go]').forEach(b => b.onclick = () => { ui.sit = +b.dataset.go; render(); });
+    $$('[data-sv]').forEach(b => b.onclick = () => {
+      act({ type: 'stateVote', sit: s.id, face: b.dataset.sv }); pick(b); sfx.win();
+      const allDone = E.SITS.every(x => x.id === s.id || (S.stateVotes[x.id] || {})[me.team]);
+      if (allDone) setTimeout(() => celebrate('¡Misión cumplida!', 'Eligieron una cara para cada situación.'), 400);
+      else setTimeout(() => { const nx = E.SITS.findIndex(x => x.id !== s.id && !(S.stateVotes[x.id] || {})[me.team]); if (nx >= 0) { ui.sit = nx; render(); } }, 700);
+    });
+  }
+};
+VIEWS.m5 = {
+  html: () => {
+    const t = me.team, myMsg = S.messages.filter(x => x.team === t), myW = S.welcome.filter(x => x.team === t), myR = S.rules.filter(x => x.team === t);
+    const topic = { Agua: 'el agua', Aire: 'el aire', Tierra: 'la tierra', 'Energía': 'la energía' }[t];
+    const doors = `<div class="doors" role="tablist">
+      <button class="door" type="button" role="tab" data-tab="welcome" aria-selected="${ui.m5 === 'welcome'}">${ICON.wave}Saludo<small>${myW.length ? myW.length + ' enviados' : 'Misión 1'}</small></button>
+      <button class="door" type="button" role="tab" data-tab="msg" aria-selected="${ui.m5 === 'msg'}">${ICON.bubble}Mensaje<small>${myMsg.length} de 3</small></button>
+      <button class="door" type="button" role="tab" data-tab="rule" aria-selected="${ui.m5 === 'rule'}">${ICON.bolt}Regla<small>${myR.length ? myR.length + ' enviadas' : 'Misión 3'}</small></button></div>`;
+    let body = '';
+    if (ui.m5 === 'welcome') body = `<section class="mission">${head(1, 'Escriban un saludo', myW.length > 0, 'm5')}<p class="say">La raya <b>___</b> es donde va el nombre del niño que llega.</p>
+      <div class="tpl"><button type="button" data-tpl="¡Hola, ___! Hoy podemos ">¡Hola, ___! Hoy podemos…</button><button type="button" data-tpl="¡Qué bueno verte, ___! ">¡Qué bueno verte, ___!…</button></div>
+      <input class="inp" id="wIn" maxlength="100" placeholder="¡Hola, ___! …" autocomplete="off"><div class="wcount" id="wWc"></div>
+      <div><button class="magic" id="wSend" type="button">${ICON.send}Enviar saludo</button></div>
+      ${myW.length ? `<div class="mine">${myW.map(x => `<div><span>${esc(x.text)}</span><button class="x" type="button" data-del="welcome:${x.id}" aria-label="Borrar">×</button></div>`).join('')}</div>` : ''}</section>`;
+    if (ui.m5 === 'msg') body = `<section class="mission">${head(2, `Un mensaje para cuidar ${topic}`, myMsg.length >= 3, 'm5')}
+      <p class="say">Máximo 12 palabras y en positivo: digan lo que <b>sí</b> hay que hacer.</p>
+      <input class="inp" id="mIn" maxlength="120" placeholder="Por ejemplo: Cierra bien la llave…" autocomplete="off"><div class="wcount" id="mWc"></div>
+      <p class="tip" id="mTip" hidden>Mejor en positivo: cuenten lo que sí hay que hacer.</p>
+      <p class="say"><b>¿Con qué cara lo dice el Ecobot?</b></p>${facePick(ui.mFace, 'data-mf')}
+      <div><button class="magic" id="mSend" type="button">${ICON.send}Enviar mensaje</button></div>
+      ${myMsg.length ? `<div class="mine">${myMsg.map(x => `<div><span>${esc(x.text)}</span><button class="x" type="button" data-del="messages:${x.id}" aria-label="Borrar">×</button></div>`).join('')}</div>` : ''}</section>`;
+    if (ui.m5 === 'rule') body = `<section class="mission">${head(3, 'Enséñenle una regla', myR.length > 0, 'm5')}
+      <p class="say"><b>SI</b> pasa…</p><select class="inp" id="rSit">${E.SITS.map(s => `<option ${ui.rSit === s.t ? 'selected' : ''}>${esc(s.t)}</option>`).join('')}</select>
+      <p class="say"><b>ENTONCES</b> pone cara…</p>${facePick(ui.rFace, 'data-rf')}
+      <p class="say"><b>y dice…</b></p><input class="inp" id="rSay" maxlength="100" placeholder="¡Gracias por ayudarme!" autocomplete="off"><div class="wcount" id="rWc"></div>
+      <div><button class="magic" id="rSend" type="button">${ICON.send}Enviar regla</button></div>
+      ${myR.length ? `<div class="mine">${myR.map(x => `<div><span>SI ${esc(x.sit)} → ${esc(x.say)}</span><button class="x" type="button" data-del="rules:${x.id}" aria-label="Borrar">×</button></div>`).join('')}</div>` : ''}</section>`;
+    return doors + `<div class="missions">${body}</div>`;
+  },
+  bind() {
+    $$('[data-tab]').forEach(b => b.onclick = () => { ui.m5 = b.dataset.tab; sfx.tap(); render(); });
+    $$('[data-del]').forEach(b => b.onclick = () => { const [list, id] = b.dataset.del.split(':'); act({ type: 'del', list, id }); });
+    const ok = v => { if (!v) { toast('Escriban algo primero', true); return false; } if (E.words(v) > 12) { toast('Máximo 12 palabras: acórtenlo', true); return false; } return true; };
+    if (ui.m5 === 'welcome') {
+      const inp = $('#wIn'); bindWords(inp, $('#wWc'));
+      $$('[data-tpl]').forEach(b => b.onclick = () => { inp.value = b.dataset.tpl; inp.focus(); inp.oninput(); });
+      $('#wSend').onclick = () => { const v = inp.value.trim(); if (!ok(v)) return; inp.value = ''; inp.oninput(); act({ type: 'add', list: 'welcome', item: { text: v } }); celebrate('¡Saludo enviado!', 'El Ecobot ya sabe saludar con sus palabras.'); };
+    }
+    if (ui.m5 === 'msg') {
+      const inp = $('#mIn'); bindWords(inp, $('#mWc'), $('#mTip'));
+      $$('[data-mf]').forEach(b => b.onclick = () => { ui.mFace = b.dataset.mf; $$('[data-mf]').forEach(x => x.setAttribute('aria-pressed', x === b)); pick(b); });
+      $('#mSend').onclick = () => { const v = inp.value.trim(); if (!ok(v)) return; inp.value = ''; inp.oninput(); act({ type: 'add', list: 'messages', item: { text: v, theme: me.team, face: ui.mFace } }); celebrate('¡Mensaje enviado!', 'Escuchen al Ecobot en la pantalla grande.', S.faces[ui.mFace]); };
+    }
+    if (ui.m5 === 'rule') {
+      const inp = $('#rSay'); bindWords(inp, $('#rWc'));
+      $('#rSit').onchange = e => ui.rSit = e.target.value;
+      $$('[data-rf]').forEach(b => b.onclick = () => { ui.rFace = b.dataset.rf; $$('[data-rf]').forEach(x => x.setAttribute('aria-pressed', x === b)); pick(b); });
+      $('#rSend').onclick = () => { const v = inp.value.trim(); if (!ok(v)) return; inp.value = ''; inp.oninput(); act({ type: 'add', list: 'rules', item: { sit: $('#rSit').value, face: ui.rFace, say: v } }); celebrate('¡Regla aprendida!', 'Ahora el Ecobot sabe qué hacer en esa situación.', S.faces[ui.rFace]); };
+    }
+  }
+};
+VIEWS.m6 = {
+  html: () => {
+    const r = S.evalTeam[me.team];
+    const opts = [['mucho', 'Mucho', 'feliz'], ['medio', 'Más o menos', 'abierto'], ['poco', 'Poco', 'triste']];
+    return `<div class="missions"><section class="mission" style="text-align:center;justify-items:center">${head(1, S.awake ? '¡Lo lograron! El Ecobot despertó' : 'Cuando el moderador diga 3, 2, 1…', S.awake, 'm6')}
+      <p class="say" style="margin:0 auto">${S.awake ? 'Gracias a ustedes, el Ecobot ya tiene nombre, caras y palabras.' : 'Digan todos juntos, bien fuerte:'}</p><p class="namebig">¡${esc(E.botName(S))}!</p></section>
+    <section class="mission">${head(2, '¿Les gustó el taller?', !!r)}<div class="rate">${opts.map(([k, l, f]) => `<button type="button" class="face" data-rate="${k}" aria-pressed="${r === k}">${E.faceSVG(S.faces[f] || S.faces.feliz)}<span>${l}</span></button>`).join('')}</div></section></div>`;
+  },
+  bind() { $$('[data-rate]').forEach(b => b.onclick = () => { const first = !S.evalTeam[me.team]; act({ type: 'rate', val: b.dataset.rate }); if (first) celebrate('¡Gracias!', 'El Ecobot guardó su respuesta con mucho cariño.'); else pick(b); }); }
+};
+
+render();
+</script>
+</body>
+</html>

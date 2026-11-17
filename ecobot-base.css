@@ -1,0 +1,204 @@
+/* Ecobot Cobra Vida · estilos compartidos. Cada página define sus colores (tokens) en :root. */
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:17px;line-height:1.5}
+h1,h2,h3,h4{font-family:var(--f-display);color:var(--heading);text-wrap:balance;margin:0;line-height:1.2}
+p{margin:0}
+button,input,select,textarea{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--sun);outline-offset:2px}
+img{max-width:100%}
+
+/* Robot */
+.robot{display:block;width:100%;overflow:visible}
+.robot .head{fill:var(--robot);stroke:var(--robot-line);stroke-width:6}
+.robot .ear{fill:var(--robot-body);stroke:var(--robot-line);stroke-width:5}
+.robot .screen{fill:var(--screen)}
+.robot .neck{fill:var(--robot-line)}
+.robot .body{fill:var(--robot-body);stroke:var(--robot-line);stroke-width:5}
+.robot .badge{fill:#2f8a57}
+.robot .tri{fill:none;stroke:#fff;stroke-width:3.5;stroke-linejoin:round}
+.robot .stem{fill:none;stroke:#3f8f4f;stroke-width:5;stroke-linecap:round}
+.robot .leaf{fill:#5fbf5a;stroke:#3f8f4f;stroke-width:2}
+.robot .shadow{fill:var(--robot-line);opacity:.14}
+.robot .led{fill:var(--led-off);transition:fill .08s}
+.robot .led.on{fill:var(--led);filter:var(--glow)}
+.robot .sprout{transform-origin:150px 74px;transform:scale(var(--sp,.55));transition:transform .8s cubic-bezier(.3,1.6,.5,1)}
+.robot .bob{animation:bob 3.4s ease-in-out infinite}
+.robot.asleep .bob{animation-duration:6s}
+@keyframes bob{50%{transform:translateY(-5px)}}
+.robot .zzz text{font-family:var(--f-display);font-weight:800;fill:#8b80e0;opacity:0}
+.robot.asleep .zzz text{animation:zz 2.4s ease-in-out infinite}
+.robot.asleep .zzz text:nth-child(2){animation-delay:.4s}
+.robot.asleep .zzz text:nth-child(3){animation-delay:.8s}
+@keyframes zz{0%{opacity:0;transform:translateY(6px)}40%,70%{opacity:1}100%{opacity:0;transform:translateY(-8px)}}
+.robot.woke .screen{animation:wakeflash 1.2s ease-out 2}
+@keyframes wakeflash{50%{fill:#1d4a44}}
+
+/* Burbuja de diálogo */
+.bubble{background:var(--surface);color:var(--ink);border:2px solid var(--sun-line);border-radius:16px;padding:8px 14px;font-weight:700;line-height:1.3;text-align:center}
+
+/* Botones */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:0;border-radius:12px;background:var(--brand);color:var(--brand-ink);padding:10px 16px;font-weight:800;cursor:pointer;line-height:1.2;text-align:center;text-decoration:none}
+.btn:hover{background:var(--brand-2)}
+.btn.soft{background:var(--brand-soft);color:var(--heading)}
+.btn.soft:hover{background:var(--line)}
+.btn.sun{background:var(--sun);color:#2d2000}
+.btn.ghost{background:transparent;border:1px solid var(--line);color:var(--ink)}
+.btn.sm{padding:6px 12px;font-size:.9rem;border-radius:10px}
+.btn.big{font-size:1.3rem;padding:16px 28px;border-radius:16px}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.btn svg{width:20px;height:20px;flex:none}
+.row-btns{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{border:2px solid var(--line);background:var(--surface);border-radius:999px;padding:6px 14px;font-weight:700;cursor:pointer}
+.chip[aria-pressed="true"]{background:var(--brand);border-color:var(--brand);color:#fff}
+.tag{display:inline-block;font-size:.75rem;font-weight:800;border-radius:6px;padding:2px 8px;background:var(--surface-2);color:var(--heading)}
+.tag.ex{background:var(--sun-bg);color:var(--sun-ink)}
+.x{border:0;background:none;color:var(--muted);font-size:1.3rem;cursor:pointer;line-height:1;padding:2px 6px;border-radius:6px}
+.x:hover{color:var(--danger);background:var(--surface-2)}
+.counter{display:flex;align-items:center;gap:8px}
+.counter button{width:34px;height:34px;border-radius:50%;border:2px solid var(--line);background:var(--surface);font-weight:800;font-size:1.1rem;cursor:pointer;line-height:1}
+.counter button:hover{border-color:var(--brand-2)}
+.counter output{font-family:var(--f-display);font-weight:800;font-size:1.3rem;min-width:1.6em;text-align:center;font-variant-numeric:tabular-nums}
+
+/* Campos */
+.field{display:grid;gap:4px;min-width:0}
+.field label{font-size:.85rem;font-weight:800;color:var(--muted)}
+input[type=text],input:not([type]),input[type=password],input[type=number],select,textarea{border:2px solid var(--line);background:var(--surface);border-radius:10px;padding:9px 12px;min-width:0;width:100%}
+input:focus,select:focus,textarea:focus{border-color:var(--brand-2);outline:none}
+.form{display:grid;gap:10px;grid-template-columns:repeat(auto-fit,minmax(min(100%,180px),1fr));align-items:end}
+.form .wide{grid-column:1/-1}
+
+/* Matriz LED */
+.ledgrid{display:grid;grid-template-columns:repeat(8,var(--cs,34px));gap:5px;touch-action:none;user-select:none;-webkit-user-select:none}
+.ledgrid.labeled{grid-template-columns:18px repeat(8,var(--cs,34px))}
+.ledgrid .lb{color:#86a8a0;font-size:.72rem;font-weight:800;display:grid;place-items:center;font-family:var(--f-display)}
+.cell{width:var(--cs,34px);height:var(--cs,34px);border-radius:50%;border:0;background:var(--led-off);cursor:pointer;padding:0;transition:background .08s,box-shadow .08s}
+.cell:hover{box-shadow:inset 0 0 0 2px rgba(255,255,255,.35)}
+.cell.on{background:var(--led);box-shadow:0 0 10px rgba(51,209,179,.75)}
+.cell:focus-visible{outline:3px solid var(--sun);outline-offset:1px}
+
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--brand);color:#fff;font-weight:800;padding:10px 18px;border-radius:12px;z-index:60;opacity:0;transition:opacity .2s;pointer-events:none;max-width:90vw;text-align:center}
+.toast.show{opacity:1}
+.conn{display:inline-flex;align-items:center;gap:6px;font-size:.82rem;font-weight:800;border-radius:999px;padding:3px 10px;background:rgba(255,255,255,.14);color:inherit}
+.conn i{width:9px;height:9px;border-radius:50%;background:#e3a313}
+.conn.online i{background:#5fe08e}
+.conn.offline i{background:#e0605f}
+
+/* Brazos, boca, mejillas y gestos del robot */
+.robot .arm rect,.robot .arm circle{fill:var(--robot-body);stroke:var(--robot-line);stroke-width:4}
+.robot .armL{transform-box:view-box;transform-origin:98px 247px;transform:rotate(-38deg);transition:transform .45s cubic-bezier(.3,1.5,.5,1)}
+.robot .armR{transform-box:view-box;transform-origin:202px 247px;transform:rotate(38deg);transition:transform .45s cubic-bezier(.3,1.5,.5,1)}
+.robot.wave .armR{animation:waveR .42s ease-in-out infinite alternate}
+.robot.cheer .armR{animation:waveR .36s ease-in-out infinite alternate}
+.robot.cheer .armL{animation:waveL .36s ease-in-out infinite alternate}
+@keyframes waveR{from{transform:rotate(-55deg)}to{transform:rotate(-95deg)}}
+@keyframes waveL{from{transform:rotate(55deg)}to{transform:rotate(95deg)}}
+.robot.asleep .armL{transform:rotate(-55deg)}.robot.asleep .armR{transform:rotate(55deg)}
+.robot .mbar{fill:var(--led-off);transition:fill .15s}
+.robot.talking .mbar{fill:var(--led);filter:var(--glow)}
+.robot .cheek{fill:#ff8fb1;opacity:0;transition:opacity .3s}
+.robot.cheer .cheek,.robot.wave .cheek,.robot.wiggle .cheek{opacity:.55}
+.robot .jig{transform-box:view-box;transform-origin:150px 300px}
+.robot.wiggle .jig{animation:wiggle .6s ease-in-out}
+.robot.hop .jig{animation:hopR .45s ease-in-out 2}
+.robot.cheer .jig{animation:hopR .5s ease-in-out infinite}
+.robot.talking .head{animation:nod .5s ease-in-out infinite alternate}
+.robot .head,.robot .screen{transform-box:view-box;transform-origin:150px 220px}
+@keyframes wiggle{20%{transform:rotate(-7deg)}45%{transform:rotate(6deg)}70%{transform:rotate(-4deg)}}
+@keyframes hopR{50%{transform:translateY(-14px) scale(1.02,.98)}}
+@keyframes nod{to{transform:translateY(-1.5px)}}
+.robot .sprout .leaf{transform-box:fill-box;transform-origin:0% 100%;animation:leafy 3s ease-in-out infinite alternate}
+@keyframes leafy{to{transform:rotate(6deg)}}
+.heart{position:absolute;width:30px;height:30px;pointer-events:none;z-index:5;animation:heartUp 2.4s ease-out forwards;opacity:0}
+.heart svg{width:100%;height:100%;display:block;filter:drop-shadow(0 3px 6px rgba(0,0,0,.25))}
+@keyframes heartUp{0%{opacity:0;transform:translate(0,10px) scale(.4)}15%{opacity:1;transform:translate(0,0) scale(1.1)}100%{opacity:0;transform:translate(var(--dx),-140px) scale(.9) rotate(12deg)}}
+
+/* Pies que caminan */
+.robot .foot rect{fill:var(--robot-body);stroke:var(--robot-line);stroke-width:4}
+.robot .foot{transform-box:fill-box;transform-origin:50% 100%}
+.robot.walking .footL{animation:stepF .42s ease-in-out infinite alternate}
+.robot.walking .footR{animation:stepF .42s ease-in-out infinite alternate-reverse}
+@keyframes stepF{from{transform:translateY(0) rotate(0)}to{transform:translateY(-10px) rotate(-10deg)}}
+.robot.t-dance .footL,.robot.do-jump .footL,.robot.cheer .footL{animation:stepF .3s ease-in-out infinite alternate}
+.robot.t-dance .footR,.robot.do-jump .footR,.robot.cheer .footR{animation:stepF .3s ease-in-out infinite alternate-reverse}
+
+/* Cohete */
+.robot .flame{opacity:0;transform-box:view-box;transform-origin:150px 300px;transition:opacity .2s}
+.robot .fl1{fill:#f2b632}.robot .fl2{fill:#fff4c2}
+.robot.jet .flame{opacity:1;animation:flick .12s ease-in-out infinite alternate}
+@keyframes flick{to{transform:scaleY(1.25) scaleX(.9)}}
+.robot.zombie .armL{transform:rotate(-4deg)}.robot.zombie .armR{transform:rotate(4deg)}
+
+/* Partes del robot y monerías */
+.robot .p-head{transform-box:view-box;transform-origin:150px 150px}
+.robot .p-body{transform-box:view-box;transform-origin:150px 268px}
+.robot .p-armLw{transform-box:view-box;transform-origin:98px 247px}
+.robot .p-armRw{transform-box:view-box;transform-origin:202px 247px}
+.robot .sweat{opacity:0}
+.robot.asleep .jig{animation:breath 3.2s ease-in-out infinite}
+@keyframes breath{50%{transform:scale(1.015,.985) translateY(3px)}}
+.robot.asleep .sprout{transform:scale(var(--sp,.55)) rotate(-14deg)}
+.robot.t-headspin .p-head{animation:headspin 1.4s cubic-bezier(.5,0,.3,1)}
+@keyframes headspin{to{transform:rotate(360deg)}}
+.robot.t-headturn .p-head{animation:headturn 1.7s ease-in-out}
+@keyframes headturn{25%{transform:rotate(-14deg)}60%{transform:rotate(14deg)}100%{transform:none}}
+.robot.t-toss .p-head{animation:toss 1.9s cubic-bezier(.3,.6,.4,1)}
+@keyframes toss{0%{transform:none}12%{transform:translateY(10px) scale(1.04,.94)}50%{transform:translateY(-170px) rotate(380deg)}74%{transform:translateY(0) rotate(720deg)}82%{transform:translateY(8px) scale(1.08,.9) rotate(720deg)}92%{transform:translateY(-10px) rotate(720deg)}100%{transform:rotate(720deg)}}
+.robot.t-toss .p-armLw{animation:catchL 1.9s ease-in-out}.robot.t-toss .p-armRw{animation:catchR 1.9s ease-in-out}
+@keyframes catchL{30%,70%{transform:rotate(95deg)}}@keyframes catchR{30%,70%{transform:rotate(-95deg)}}
+.robot.t-apart .p-head{animation:apartH 3.1s cubic-bezier(.3,1.3,.5,1)}
+.robot.t-apart .p-armLw{animation:apartL 3.1s cubic-bezier(.3,1.3,.5,1)}
+.robot.t-apart .p-armRw{animation:apartR 3.1s cubic-bezier(.3,1.3,.5,1)}
+.robot.t-apart .p-body{animation:apartB 3.1s cubic-bezier(.3,1.3,.5,1)}
+@keyframes apartH{0%{transform:none}18%,40%{transform:translate(-40px,-120px) rotate(-30deg)}50%{transform:translate(-30px,-130px) rotate(-10deg)}60%{transform:translate(-44px,-116px) rotate(-38deg)}84%{transform:translate(0,8px)}100%{transform:none}}
+@keyframes apartL{0%{transform:none}18%,60%{transform:translate(-100px,26px) rotate(-150deg)}84%{transform:translate(0,4px)}100%{transform:none}}
+@keyframes apartR{0%{transform:none}18%,60%{transform:translate(104px,-34px) rotate(170deg)}84%{transform:translate(0,4px)}100%{transform:none}}
+@keyframes apartB{0%{transform:none}18%,60%{transform:translate(8px,34px) rotate(14deg)}84%{transform:translate(0,-6px)}100%{transform:none}}
+.robot.t-spin .jig{animation:spinAll 1.3s cubic-bezier(.4,0,.3,1)}
+@keyframes spinAll{0%{transform:none}45%{transform:translateY(-40px) rotate(200deg)}80%{transform:translateY(0) rotate(360deg) scale(1.05,.93)}100%{transform:rotate(360deg)}}
+.robot.t-dance .jig{animation:dance .65s ease-in-out 4}
+@keyframes dance{25%{transform:rotate(-9deg) translateY(-10px)}50%{transform:none}75%{transform:rotate(9deg) translateY(-10px)}}
+.robot.t-dance .p-head{animation:headturn .65s ease-in-out 4}
+.robot.t-snore .p-head{animation:nodoff 3.4s ease-in-out}
+@keyframes nodoff{30%{transform:rotate(8deg) translateY(6px)}55%{transform:rotate(10deg) translateY(8px)}62%{transform:rotate(-3deg) translateY(-6px)}75%,100%{transform:none}}
+.robot.t-snore .zzz text{animation-duration:1.2s}
+.robot.t-yawn .p-armLw{animation:catchL 2.3s ease-in-out}.robot.t-yawn .p-armRw{animation:catchR 2.3s ease-in-out}
+.robot.t-yawn .jig{animation:stretchy 2.3s ease-in-out}
+@keyframes stretchy{40%,60%{transform:scale(.97,1.06) translateY(-8px)}}
+.robot.t-peek .p-head{animation:headturn 2.4s ease-in-out}
+.robot.t-scared .jig{animation:scared 1.4s ease-out}
+.robot.t-scared .sweat{opacity:1;animation:sweat 1.4s ease-in}
+.robot.t-scared .p-armLw{animation:catchL 1.4s ease-out}.robot.t-scared .p-armRw{animation:catchR 1.4s ease-out}
+@keyframes scared{0%{transform:none}14%{transform:translateY(-34px) scale(1.06)}24%{transform:translate(-7px,-28px)}32%{transform:translate(7px,-26px)}40%{transform:translate(-7px,-22px)}48%{transform:translate(7px,-18px)}70%{transform:translateY(4px) scale(1.03,.96)}100%{transform:none}}
+@keyframes sweat{to{transform:translateY(16px);opacity:0}}
+.robot.t-wakeup .jig{animation:wakejump 2.2s ease-out}
+.robot.t-wakeup .p-armLw{animation:catchL 2.2s ease-in-out}.robot.t-wakeup .p-armRw{animation:catchR 2.2s ease-in-out}
+@keyframes wakejump{0%{transform:none}15%{transform:translateY(-26px) scale(1.04)}30%{transform:translateY(0) scale(1.05,.94)}45%,100%{transform:none}}
+
+/* Paisajes */
+.landscape{display:block;width:100%;height:100%}
+.landscape .ls-sway{transform-box:fill-box;transform-origin:50% 100%;animation:sway 4.5s ease-in-out infinite alternate}
+@keyframes sway{from{transform:rotate(-2.5deg)}to{transform:rotate(2.5deg)}}
+.landscape .ls-spin{animation:spin 5s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.landscape .ls-wave{animation:waves 2.8s ease-in-out infinite alternate}
+@keyframes waves{to{transform:translateX(14px)}}
+.landscape .ls-jump{animation:fish 4.5s ease-in-out infinite;transform-box:fill-box;transform-origin:center}
+@keyframes fish{0%,55%{transform:translate(-40px,20px) rotate(30deg);opacity:0}65%{opacity:1}75%{transform:translate(0,-34px) rotate(0)}88%{transform:translate(40px,14px) rotate(-35deg);opacity:1}100%{transform:translate(40px,24px);opacity:0}}
+.landscape .ls-cloud{animation:cloud 40s linear infinite alternate}
+@keyframes cloud{to{transform:translateX(160px)}}
+.landscape .ls-kite{animation:kite 3.4s ease-in-out infinite alternate}
+@keyframes kite{to{transform:translate(22px,-16px) rotate(9deg)}}
+.landscape .ls-glint{animation:glint 3s ease-in-out infinite}
+@keyframes glint{0%,70%{opacity:0;transform:translateX(0)}80%{opacity:.5}100%{opacity:0;transform:translateX(44px)}}
+.landscape .ls-lamp{animation:lamp 2.2s ease-in-out infinite alternate}
+@keyframes lamp{to{opacity:.5}}
+.landscape .ls-bolt{animation:bolt 2.6s ease-in-out infinite}
+@keyframes bolt{0%,80%,100%{opacity:.15}85%,92%{opacity:1}}
+.landscape .ls-worm{animation:worm 3s ease-in-out infinite alternate}
+@keyframes worm{to{transform:translateX(14px)}}
+.landscape .ls-bloom{transform-box:fill-box;transform-origin:center;animation:bloom 2.5s ease-in-out infinite alternate}
+@keyframes bloom{to{transform:scale(1.15) rotate(20deg)}}
+
+html.calm *{animation:none!important;transition:none!important}

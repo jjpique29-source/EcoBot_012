@@ -1,0 +1,94 @@
+ECOBOT COBRA VIDA · TALLER 1
+============================
+
+Hay 6 pantallas:
+  1. Mando principal (admin.html) ......... el moderador dirige todo desde aquí.
+  2-5. Escuadrón (escuadron.html) ......... una tableta por mesa: Agua, Aire, Tierra y Energía.
+  6. Pantalla grande (pantalla.html) ...... el Ecobot gigante para el proyector o el televisor.
+
+CÓMO PREPARARLO (una sola vez)
+  1. Instalen Node.js (versión LTS) desde https://nodejs.org en el computador del moderador.
+  2. Copien esta carpeta completa a ese computador.
+
+EL DÍA DEL TALLER
+  1. Conecten el computador del moderador, las tabletas y el proyector al MISMO wifi.
+  2. Abran "iniciar-taller.bat" (doble clic). Si Windows pregunta por el firewall,
+     elijan "Permitir" en redes privadas.
+  3. La ventana negra muestra direcciones como:  http://192.168.1.20:8080
+       - Proyector:  http://192.168.1.20:8080/pantalla.html  → toquen "Encender la pantalla".
+       - Tabletas:   http://192.168.1.20:8080/escuadron.html → cada mesa elige su escuadrón.
+  4. El mando principal se abre solo. Arriba aparece la CLAVE de cada escuadrón:
+     dénsela al guía de cada mesa.
+  5. Dejen abierta la ventana negra durante todo el taller.
+
+CONTROL DESDE EL MANDO
+  - Al cambiar de momento en el mando, las tabletas y la pantalla cambian solas.
+  - "Pausar tabletas": las tabletas muestran "¡Miren la pantalla grande!".
+  - Momento 2: "Abrir votación en tabletas" deja votar una vez por escuadrón.
+  - Momento 3: eligen qué emoción dibuja cada escuadrón.
+  - "Nuevas claves" saca a todas las tabletas y deben entrar de nuevo.
+  - La voz sale por la pantalla grande. En el mando se puede activar "Voz aquí".
+
+SIN SERVIDOR
+  Si abren index.html con doble clic, todo funciona pero solo entre ventanas
+  del MISMO computador (por ejemplo, mando en la laptop y pantalla grande en
+  el proyector conectado como segunda pantalla).
+
+LO QUE SE GUARDA
+  Todo queda en "datos-taller.json" en esta carpeta. Para empezar con otro
+  grupo usen "Empezar con otro grupo" en el momento 6 del mando.
+
+PLANTILLA
+  Carpeta "materiales": plantilla de ojitos (PDF) y 2 fotos de prueba.
+  También se descargan desde la página de inicio (index.html). Impriman una por escuadrón. Los niños
+  rellenan los círculos y toman la foto desde su tableta (momento 3).
+
+VOZ DEL ECOBOT
+  La pantalla grande elige sola la voz en español más dulce del equipo.
+  En Microsoft Edge aparecen voces «natural» (como Salome, de Colombia),
+  que son las mejores. Pueden cambiarla con el botón «Voz» de la pantalla grande.
+  En las tabletas el Ecobot habla solo cuando los niños tocan el parlante
+  o al Ecobot.
+
+EL ECOBOT ESCUCHA SU NOMBRE
+  En la pantalla grande y en la página de inicio hay un botón para escuchar.
+  Al tocarlo, el navegador pide permiso para el micrófono. Los niños gritan
+  el nombre del Ecobot (el que eligieron en el momento 2) y se despierta en
+  todas las pantallas. Si gritan fuerte sin decir el nombre, abre un ojo.
+  Requisitos: Microsoft Edge o Google Chrome, internet, y abrir la pantalla
+  en el computador del servidor (http://localhost:8080/pantalla.html) o con
+  doble clic. Desde otra dirección (http://192.168...) el navegador bloquea
+  el micrófono.
+
+MONERÍAS
+  El Ecobot hace trucos solo: ronca cuando duerme, gira y bota la cabeza,
+  baila, se desarma y se vuelve a armar. Es más inquieto en la pausa activa
+  y en el cierre. Si pasan el mouse sobre él, se despierta o se asusta.
+  La voz recomendada es Paola (Venezuela, natural) en Microsoft Edge.
+
+ACROBACIAS DE LA PANTALLA GRANDE
+  De vez en cuando (más seguido en la pausa activa y el cierre) el Ecobot:
+  se acerca al vidrio y toca «¡toc, toc!», se va de la pantalla y vuelve
+  con un «¡Bu!», despega en cohete, se teletransporta, juega a las escondidas,
+  rebota como pelota, se vuelve gigante y chiquito, o camina sonámbulo.
+  Si nadie interactúa por unos minutos, se queda dormido; se despierta con
+  cualquier evento, al pasar el mouse o al oír su nombre.
+  El moderador puede lanzar cada acrobacia con los botones del mando principal.
+
+SHOWS Y RITMO DE LA PANTALLA GRANDE
+  - Todo el tiempo: el Ecobot camina por la pantalla cada 20 a 40 segundos y a
+    veces se acerca a saludar de cerca.
+  - Cada 2½ a 4 minutos: una acrobacia (no repite hasta hacerlas todas).
+  - Cada 10 minutos: un show nuevo, sin repetir hasta hacerlos todos:
+    4 canciones originales con letra en pantalla (reciclaje, la gotita,
+    la canción del Ecobot con su nombre, la energía), fiesta disco,
+    truco de magia, pausa de energía, adivinanza y dato curioso.
+  - Desde el mando principal se puede lanzar cualquier show o acrobacia;
+    si hay uno en curso, el nuevo empieza cuando termine.
+
+SI EL ECOBOT NO SE MUEVE
+  Ahora el Ecobot se mueve aunque Windows tenga apagados los «Efectos de
+  animación». Si alguna vez quieren que se mueva poco, abran «Voz» en la
+  pantalla grande y marquen «Modo calmado».
+  Recuerden tocar «Encender la pantalla» al abrir la pantalla grande:
+  hasta ese momento el Ecobot espera.

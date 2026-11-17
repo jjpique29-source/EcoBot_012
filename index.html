@@ -1,0 +1,275 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Ecobot Cobra Vida · Taller 1</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700;800&family=Nunito:wght@600;700;800&display=swap">
+<link rel="stylesheet" href="ecobot-base.css">
+<style>
+/* Inicio: un panel de bosque con el Ecobot cambiando de cara; debajo, tres puertas ilustradas (mando, escuadrón, pantalla) y los 3 pasos para conectar. */
+:root{color-scheme:light;
+  --bg:#eef7f0; --surface:#ffffff; --surface-2:#e3f1e7; --ink:#17271e; --muted:#5a6d61; --line:#d3e4d8;
+  --heading:#1e5b3a; --brand:#1e5b3a; --brand-2:#2f7d50; --brand-ink:#fff; --brand-soft:#dff0e4;
+  --forest:#0f3322; --forest-2:#17492f;
+  --led:#33d1b3; --led-off:#21403b; --screen:#0f2321; --sun:#e3a313; --sun-bg:#fdf3d4; --sun-ink:#7a5600; --sun-line:#f0c95a;
+  --robot:#e6f3e8; --robot-line:#1e5b3a; --robot-body:#cfe8d6; --danger:#c4473a;
+  --f-display:'Poppins', ui-sans-serif, system-ui, sans-serif; --f-body:'Nunito', ui-sans-serif, system-ui, sans-serif}
+body{background-color:var(--bg);background-image:radial-gradient(circle,#d2e8d9 1.6px,transparent 1.8px);background-size:22px 22px}
+.wrap{max-width:1140px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:24px 56px;display:grid;gap:40px}
+
+/* Panel principal */
+.hero{position:relative;overflow:hidden;border-radius:32px;background:radial-gradient(90% 120% at 80% 30%,var(--forest-2),var(--forest) 70%);color:#fff;display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,.85fr);align-items:center;gap:20px;padding:44px 48px 36px}
+.hero::before{content:"";position:absolute;inset:0;background-image:radial-gradient(circle,rgba(51,209,179,.16) 1.6px,transparent 1.9px);background-size:20px 20px;mask-image:linear-gradient(100deg,transparent 35%,#000 80%);-webkit-mask-image:linear-gradient(100deg,transparent 35%,#000 80%);pointer-events:none}
+.hero > *{position:relative}
+.eyebrow{display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.18);border-radius:999px;padding:5px 14px;font-weight:800;font-size:.85rem;letter-spacing:.04em;color:#cfeedd}
+.eyebrow i{width:8px;height:8px;border-radius:50%;background:var(--led);box-shadow:0 0 8px var(--led)}
+.hero h1{color:#fff;font-size:clamp(2.6rem,1.6rem + 4.4vw,5rem);font-weight:800;line-height:.98;letter-spacing:-.02em;margin-top:16px}
+.hero h1 span{display:block;color:var(--led);text-shadow:0 0 30px rgba(51,209,179,.45)}
+.hero p.lead{font-size:1.2rem;color:#cfe3d7;max-width:42ch;margin-top:16px}
+.teamrow{display:flex;flex-wrap:wrap;gap:8px;margin-top:22px}
+.teamrow span{display:inline-flex;align-items:center;gap:6px;background:#fff;color:var(--ink);border-radius:999px;padding:4px 12px 4px 5px;font-weight:800;font-size:.9rem}
+.teamrow svg{width:24px;height:24px;background:var(--ts);border-radius:50%;padding:2px}
+.botzone{position:relative;display:grid;place-items:center}
+.botzone::before{content:"";position:absolute;width:78%;aspect-ratio:1;border-radius:50%;background:radial-gradient(circle,rgba(227,163,19,.32),rgba(227,163,19,0) 68%)}
+#bot{width:min(100%,330px);position:relative}
+.feel{position:relative;margin-top:-6px;background:#fff;color:var(--heading);font-family:var(--f-display);font-weight:800;border-radius:999px;padding:6px 16px;font-size:1rem;box-shadow:0 8px 24px rgba(0,0,0,.25);transition:transform .25s}
+.feel.pop{transform:scale(1.08)}
+.hb{position:relative;z-index:2;background:#fff;color:var(--ink);font-family:var(--f-display);font-weight:700;border-radius:18px;padding:10px 16px;max-width:340px;text-align:center;font-size:1rem;line-height:1.3;box-shadow:0 10px 26px rgba(0,0,0,.28);margin-bottom:-4px}
+.hb::after{content:"";position:absolute;left:50%;bottom:-8px;width:16px;height:16px;background:#fff;transform:translateX(-50%) rotate(45deg);border-radius:3px}
+.hb.pop{animation:hbpop .35s cubic-bezier(.3,1.8,.5,1)}
+@keyframes hbpop{from{transform:scale(.85);opacity:.4}}
+.botctl{position:relative;display:grid;justify-items:center;gap:8px;margin-top:14px}
+.micbtn{display:inline-flex;align-items:center;gap:8px;border:0;border-radius:999px;padding:10px 18px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.3);color:#fff;font-family:var(--f-display);font-weight:700;font-size:.95rem;cursor:pointer}
+.micbtn svg{width:20px;height:20px}
+.micbtn.on{background:#d9534f;border-color:#d9534f;animation:micpulse 1.2s ease-in-out infinite}
+@keyframes micpulse{50%{box-shadow:0 0 0 10px rgba(217,83,79,.25)}}
+.meter{width:220px;height:10px;border-radius:9px;background:rgba(255,255,255,.15);overflow:hidden}
+.meter i{display:block;height:100%;width:0;background:linear-gradient(90deg,#33d1b3,#f2b632,#ff7a7a);border-radius:9px;transition:width .08s}
+.heard{color:#cfe3d7;font-style:italic;min-height:1.2em;max-width:300px;text-align:center}
+.callhint{color:#cfe3d7}.callhint b{color:var(--led)}
+
+.deco{position:absolute;width:26px;height:26px;background:#5fbf5a;border-radius:0 100% 0 100%;opacity:.85;animation:float 7s ease-in-out infinite}
+.deco.a{top:16%;left:52%;transform:rotate(20deg)}
+.deco.b{bottom:12%;left:46%;width:18px;height:18px;background:var(--sun);animation-delay:-2s}
+.deco.c{top:10%;right:6%;width:20px;height:20px;background:var(--led);animation-delay:-4s}
+@keyframes float{50%{translate:0 -12px;rotate:25deg}}
+
+/* Puertas */
+.sec-h{display:flex;justify-content:space-between;align-items:end;gap:12px;flex-wrap:wrap}
+.sec-h h2{font-size:clamp(1.5rem,1.2rem + 1.2vw,2.1rem);font-weight:800}
+.sec-h p{color:var(--muted);max-width:52ch}
+.doors{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px}
+.door{background:var(--surface);border-radius:26px;overflow:hidden;display:grid;grid-template-rows:auto 1fr;text-decoration:none;color:var(--ink);box-shadow:0 1px 0 var(--line),0 10px 30px rgba(30,91,58,.08);transition:transform .2s,box-shadow .2s}
+.door:hover{transform:translateY(-6px) rotate(-.4deg);box-shadow:0 1px 0 var(--line),0 22px 44px rgba(30,91,58,.16)}
+.door:focus-visible{outline:4px solid var(--sun);outline-offset:3px}
+.art{aspect-ratio:16/10;max-width:100%;display:grid;place-items:center;background:var(--dbg)}
+.art svg{width:86%;height:auto;transition:transform .3s}
+.door:hover .art svg{transform:scale(1.04)}
+.door-b{padding:18px 22px 22px;display:grid;gap:8px;align-content:start}
+.who{font-size:.78rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--dc)}
+.door h3{font-size:1.45rem;font-weight:800;color:var(--ink)}
+.door p{color:var(--muted)}
+.go{margin-top:8px;justify-self:start;display:inline-flex;align-items:center;gap:8px;background:var(--dc);color:#fff;border-radius:999px;padding:9px 18px;font-family:var(--f-display);font-weight:700}
+.go svg{width:18px;height:18px;transition:transform .2s}
+.door:hover .go svg{transform:translateX(4px)}
+
+/* Pasos */
+.steps{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px;position:relative}
+.steps::before{content:"";position:absolute;top:30px;left:12%;right:12%;border-top:3px dashed #b5d6c0}
+.st{position:relative;display:grid;gap:10px;justify-items:center;text-align:center;padding:0 8px}
+.st b{display:grid;place-items:center;width:60px;height:60px;border-radius:50%;background:var(--brand);color:#fff;font-family:var(--f-display);font-size:1.5rem;font-weight:800;box-shadow:0 0 0 8px var(--bg)}
+.st h4{font-size:1.1rem}
+.st p{color:var(--muted);max-width:30ch}
+.st code{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:1px 6px;font-size:.9em;color:var(--heading)}
+.cta{margin-top:26px}
+.dl{display:inline-flex;align-items:center;gap:8px;border-radius:999px;padding:10px 18px;background:var(--brand);color:#fff;font-family:var(--f-display);font-weight:700;text-decoration:none;justify-self:start;transition:transform .15s}
+.dl:hover{transform:translateY(-2px)}
+.dl svg{width:20px;height:20px;flex:none}
+.dl.alt{background:#e3f1fc;color:#1b5e91}
+.dl.big{background:var(--sun);color:#2d2000;font-size:1.05rem;padding:13px 22px;box-shadow:0 10px 30px rgba(227,163,19,.35)}
+.mats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px}
+.mat{background:var(--surface);border-radius:24px;overflow:hidden;display:grid;grid-template-rows:auto 1fr;box-shadow:0 1px 0 var(--line),0 10px 30px rgba(30,91,58,.08)}
+.thumb{aspect-ratio:16/10;max-width:100%;overflow:hidden;background:#6b5039;display:grid;place-items:center}
+.thumb img{width:100%;height:100%;object-fit:cover;object-position:50% 40%;display:block}
+.thumb.sheet{background:#dff0e4}
+.thumb.sheet svg{height:88%;width:auto;filter:drop-shadow(0 8px 16px rgba(30,91,58,.25))}
+.mat-b{padding:16px 20px 20px;display:grid;gap:8px;align-content:start}
+.mat-b h3{font-size:1.25rem;color:var(--ink)}
+.mat-b p{color:var(--muted)}
+.foot{text-align:center;color:var(--muted);font-size:.92rem}
+.foot b{color:var(--heading)}
+
+@media (max-width:900px){
+  .hero{grid-template-columns:minmax(0,1fr);padding:32px 24px 28px;text-align:center}
+  .hero p.lead{margin-inline:auto}
+  .teamrow{justify-content:center}
+  .botzone{order:-1}
+  #bot{width:min(70vw,260px)}
+  .doors{grid-template-columns:minmax(0,1fr)}
+  .door{grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr);grid-template-rows:none}
+  .art{aspect-ratio:auto;height:100%}
+  .mats{grid-template-columns:minmax(0,1fr)}
+  .mat{grid-template-columns:minmax(0,.8fr) minmax(0,1.2fr);grid-template-rows:none}
+  .thumb{aspect-ratio:auto;height:100%;min-height:180px}
+}
+@media (max-width:620px){
+  .door{grid-template-columns:minmax(0,1fr)}
+  .art{aspect-ratio:16/9}
+  .mat{grid-template-columns:minmax(0,1fr)}
+  .thumb{aspect-ratio:16/10;height:auto;min-height:0}
+  .dl.big{font-size:.95rem}
+  .steps{grid-template-columns:minmax(0,1fr);gap:22px}
+  .steps::before{top:0;bottom:0;left:30px;right:auto;border-top:0;border-left:3px dashed #b5d6c0}
+  .st{grid-template-columns:60px minmax(0,1fr);justify-items:start;text-align:left;column-gap:14px;padding:0}
+  .st b{grid-row:span 2}
+}
+</style>
+</head>
+<body>
+<main class="wrap">
+  <section class="hero">
+    <div>
+      <span class="eyebrow"><i></i>Taller 1 · Diseñando la personalidad</span>
+      <h1>Ecobot<span>Cobra Vida</span></h1>
+      <p class="lead">Hoy los Escuadrones Verdes le dan al robot del colegio un nombre, sus caras de luz y las palabras para cuidar el planeta.</p>
+      <div class="teamrow" id="teamrow"></div>
+      <div class="cta"><a class="dl big" href="materiales/Plantilla_ojitos_Ecobot.pdf" download><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></svg>Descargar plantilla de ojitos (PDF)</a></div>
+    </div>
+    <div class="botzone"><span class="deco a"></span><span class="deco b"></span><span class="deco c"></span><p class="hb" id="hb" aria-live="polite">Shhh… está dormido.</p><div id="bot"></div><span class="feel" id="feel">Dormido</span><div class="botctl"><button class="micbtn" id="micBtn" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><rect x="9" y="3" width="6" height="11" rx="3" fill="currentColor"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg><span>Llamarlo por su nombre</span></button><div class="meter" id="meter" hidden><i></i></div><small class="heard" id="heard"></small><small class="callhint">Su nombre: <b id="callName">Ecobot</b></small></div></div>
+  </section>
+
+  <section style="display:grid;gap:20px">
+    <div class="sec-h"><h2>¿Qué va a mostrar esta pantalla?</h2><p>Cada pantalla tiene su papel. Todas se conectan y el mando principal dirige el taller.</p></div>
+    <nav class="doors" aria-label="Elegir pantalla">
+      <a class="door" href="admin.html" style="--dc:#1e5b3a;--dbg:#dff0e4"><div class="art" id="artMando"></div>
+        <div class="door-b"><span class="who">Para el moderador</span><h3>Mando principal</h3><p>Guía los 6 momentos, entrega las claves, abre votaciones y decide qué dice el Ecobot.</p><span class="go">Entrar <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></div></a>
+      <a class="door" href="escuadron.html" style="--dc:#2f86c9;--dbg:#e3f1fc"><div class="art" id="artTabs"></div>
+        <div class="door-b"><span class="who">Para los niños · una por mesa</span><h3>Escuadrón</h3><p>Agua, Aire, Tierra o Energía. Entran con su clave y cumplen misiones con botones grandes.</p><span class="go">Entrar <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></div></a>
+      <a class="door" href="pantalla.html" style="--dc:#b47f06;--dbg:#fdf3d4"><div class="art" id="artTv"></div>
+        <div class="door-b"><span class="who">Para el proyector o el TV</span><h3>Pantalla grande</h3><p>El Ecobot gigante con su voz y todo lo que envían los escuadrones, en vivo.</p><span class="go">Entrar <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></div></a>
+    </nav>
+  </section>
+
+  <section style="display:grid;gap:20px" id="materiales">
+    <div class="sec-h"><h2>Materiales para imprimir</h2><p>Impriman una plantilla por escuadrón. Las fotos de prueba sirven para ensayar el escáner antes del taller.</p></div>
+    <div class="mats">
+      <article class="mat"><div class="thumb sheet" id="thumbPdf"></div><div class="mat-b"><span class="who" style="--dc:#1e5b3a">PDF · 2 páginas</span><h3>Plantilla de ojitos</h3><p>Una hoja para el ojo izquierdo y otra para el derecho, con los 4 cuadros negros que lee el escáner.</p>
+        <a class="dl" href="materiales/Plantilla_ojitos_Ecobot.pdf" download><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></svg>Descargar PDF</a></div></article>
+      <article class="mat"><div class="thumb"><img src="materiales/Prueba_ojo_izquierdo_Enojado.jpg" alt="Foto de prueba de la plantilla llena: ojo izquierdo enojado" loading="lazy"></div><div class="mat-b"><span class="who" style="--dc:#2f86c9">Foto de prueba</span><h3>Ojo izquierdo · Enojado</h3><p>Súbanla en la tableta con «Foto de este ojo» debajo del ojo izquierdo.</p>
+        <a class="dl alt" href="materiales/Prueba_ojo_izquierdo_Enojado.jpg" download><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></svg>Descargar foto</a></div></article>
+      <article class="mat"><div class="thumb"><img src="materiales/Prueba_ojo_derecho_Enojado.jpg" alt="Foto de prueba de la plantilla llena: ojo derecho enojado" loading="lazy"></div><div class="mat-b"><span class="who" style="--dc:#2f86c9">Foto de prueba</span><h3>Ojo derecho · Enojado</h3><p>Súbanla debajo del ojo derecho y escriban «Enojado» como nombre.</p>
+        <a class="dl alt" href="materiales/Prueba_ojo_derecho_Enojado.jpg" download><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></svg>Descargar foto</a></div></article>
+    </div>
+  </section>
+
+  <section style="display:grid;gap:26px">
+    <div class="sec-h"><h2>Para conectar todo</h2><p>Todos los equipos en el mismo wifi del colegio.</p></div>
+    <div class="steps">
+      <div class="st"><b>1</b><h4>Enciendan el servidor</h4><p>En el computador del moderador, doble clic en <code>iniciar-taller.bat</code>.</p></div>
+      <div class="st"><b>2</b><h4>Abran las direcciones</h4><p>La ventana negra muestra la dirección para las tabletas y el proyector.</p></div>
+      <div class="st"><b>3</b><h4>Entreguen las claves</h4><p>Cada guía le da a su mesa la clave que aparece en el mando.</p></div>
+    </div>
+  </section>
+  <p class="foot">Sin servidor también funciona, pero solo entre ventanas de <b>este mismo computador</b>.</p>
+</main>
+
+<script src="ecobot-nucleo.js"></script>
+<script>
+'use strict';
+const E = Ecobot;
+const $ = s => document.querySelector(s);
+
+/* Escuadrones */
+$('#teamrow').innerHTML = E.TEAMS.map(t => `<span style="--ts:${t.soft}">${E.teamIcon(t, 24)}${t.id}</span>`).join('');
+
+/* Ecobot interactivo: duerme, ronca, se despierta con el mouse, al tocarlo o al oír su nombre */
+const faces = E.defaultFaces(), r = E.mountRobot($('#bot')); r.sprout(1.1);
+const reduced = E.calm;
+let awake = false, sleepT = null, botName = 'Ecobot', nick = '', lastStir = 0, bubbleT = null;
+E.connect(st => { botName = E.botName(st); nick = st.nickname || ''; $('#callName').textContent = botName; if (!awake) bubble(`Shhh… ${botName} está dormido. Pasen el mouse, tóquenlo o griten su nombre.`, true); }, () => {});
+const pick = a => a[Math.random() * a.length | 0];
+function bubble(t, quiet) { const b = $('#hb'); b.textContent = t; b.classList.remove('pop'); void b.offsetWidth; b.classList.add('pop'); }
+function say(t) { bubble(t); r.talk(Math.max(1600, t.length * 70)); E.speak(t, { onstart: () => r.talk(60000), onend: () => r.hush() }); }
+function feel(t) { const el = $('#feel'); el.textContent = t; el.classList.add('pop'); setTimeout(() => el.classList.remove('pop'), 250); }
+function setSleep() { awake = false; r.stop(); r.draw(E.P.dormido, E.P.dormido); r.sleep(true); feel('Dormido'); bubble(`Shhh… ${botName} está dormido. Pasen el mouse, tóquenlo o griten su nombre.`); }
+function goSleep() { if (!awake) return; say('Mmm… me dio sueño. Voy a dormir un ratico.'); r.trick('yawn'); setTimeout(setSleep, 2600); }
+function keepAwake(ms = 45000) { clearTimeout(sleepT); sleepT = setTimeout(goSleep, ms); }
+function wake(byName) {
+  if (awake) return; awake = true; r.trick('wakeup'); r.sleep(false); feel('¡Despierto!');
+  setTimeout(() => { r.draw(faces.feliz.L, faces.feliz.R); r.cheer(2400); r.hearts(6); }, 900);
+  setTimeout(() => say(byName ? `¡Me llamaron! ¡Hola! Soy ${botName}. ¡Qué alegría verlos!` : `¡Uy! ¿Quién me despertó? ¡Hola! Soy ${botName}.`), 700);
+  keepAwake();
+}
+const SCARED = ['¡Ay! ¡Me asustaste!', '¡Uy! ¡Qué susto!', '¡Bip! ¿Quién anda ahí?', '¡Ja! ¡Casi me desarmo del susto!'];
+const FUN = [['dance', '¡Miren cómo bailo!'], ['spin', '¡Wiii! ¡Doy vueltas!'], ['toss', '¡Upa! ¡Atrapé mi cabeza!'], ['apart', '¡Ups! Me desarmé… ¡y me armé otra vez!'], ['headspin', '¡Mi cabeza gira y gira!']];
+E.hoverReact(r, { isAsleep: () => !awake, onWake: () => wake(false), onScare: () => { r.draw(faces.sorprendido.L, faces.sorprendido.R); say(pick(SCARED)); feel('¡Asustado!'); keepAwake(); setTimeout(() => awake && r.draw(faces.feliz.L, faces.feliz.R), 1600); } });
+const botEl = $('#bot'); botEl.style.cursor = 'pointer'; botEl.title = '¡Tócame!';
+botEl.onclick = () => {
+  if (!awake) { wake(false); return; }
+  const [k, t] = pick(FUN); if (r.trick(k)) { say(t); feel('¡Jugando!'); } else { r.hearts(4); E.sfx.giggle(); }
+  keepAwake();
+};
+/* Caras mientras está despierto */
+const seq = ['abierto', 'feliz', 'guino', 'sorprendido', 'amor', 'feliz'];
+let i = 0;
+setInterval(() => {
+  if (!awake || r.tricking || r.busy) return;
+  const f = faces[seq[i++ % seq.length]];
+  const set = () => { r.draw(f.L, f.R); feel(f.label); if (f === faces.amor) r.hearts(4); };
+  if (reduced) set(); else r.play([E.P.abierto, E.P.medio, E.P.cerrado, E.P.medio], 90, false, set);
+}, 3200);
+E.antics(r, { mood: () => ({ asleep: !awake, energy: 2 }), onTrick: k => { if (k === 'snore') bubble(pick(['Zzz… zzz…', 'Ronc… ronc… zzz', `Zzz… ¿alguien dijo ${botName}? Zzz…`])); } });
+setSleep();
+
+/* Escuchar su nombre */
+const mic = E.listen({
+  names: () => [botName, nick, 'Ecobot'].filter(Boolean),
+  onLevel: v => { $('#meter i').style.width = Math.round(v * 100) + '%'; if (!awake && v > .55 && Date.now() - lastStir > 5000) { lastStir = Date.now(); r.trick('peek'); bubble(`¡Más fuerte! Digan «${botName}»`); } },
+  onHeard: (t, hit) => { $('#heard').textContent = '«' + t + '»'; if (hit) { if (!awake) wake(true); else { r.trick(pick(['dance', 'spin', 'toss'])); say(`¡Aquí estoy! ¿Me llamaron?`); keepAwake(); } } },
+  onState: st => { const b = $('#micBtn'); b.classList.toggle('on', st === 'listening'); b.querySelector('span').textContent = st === 'listening' ? 'Escuchando… ¡griten su nombre!' : 'Llamarlo por su nombre'; $('#meter').hidden = st !== 'listening'; const m = E.listenError(st); if (m) bubble(m); }
+});
+$('#micBtn').onclick = () => { if (mic.on) mic.stop(); else mic.start(); };
+if (!E.listenSupported()) $('#micBtn').title = E.listenError('nosupport');
+
+/* Ilustraciones de las puertas */
+const T = E.TEAMS;
+$('#artMando').innerHTML = `<svg viewBox="0 0 240 150" aria-hidden="true">
+  <path d="M14 128h212l-12 12H26z" fill="#a9cdb6"/>
+  <rect x="34" y="14" width="172" height="114" rx="12" fill="#1e5b3a"/>
+  <rect x="42" y="22" width="156" height="98" rx="6" fill="#f2f8f3"/>
+  <rect x="42" y="22" width="156" height="17" rx="6" fill="#2f7d50"/><rect x="42" y="32" width="156" height="7" fill="#2f7d50"/>
+  ${[0, 1, 2, 3, 4, 5].map(n => `<circle cx="${54 + n * 15}" cy="30.5" r="4" fill="${n === 2 ? '#f2f8f3' : 'rgba(255,255,255,.35)'}"/>`).join('')}
+  ${T.map((t, n) => `<rect x="${50 + n * 36}" y="46" width="31" height="20" rx="4" fill="#fff" stroke="#d3e4d8"/><rect x="${50 + n * 36}" y="46" width="5" height="20" rx="2" fill="${t.c}"/><circle cx="${62 + n * 36}" cy="52" r="2.4" fill="${n < 2 ? '#3cc46f' : '#cfdcd3'}"/><rect x="${66 + n * 36}" y="50" width="11" height="4" rx="2" fill="#cfe3d5"/><rect x="${59 + n * 36}" y="58" width="18" height="4" rx="2" fill="#e3a313" opacity=".8"/>`).join('')}
+  <rect x="50" y="74" width="92" height="7" rx="3.5" fill="#cfe3d5"/><rect x="50" y="86" width="70" height="7" rx="3.5" fill="#cfe3d5"/><rect x="50" y="100" width="44" height="12" rx="6" fill="#1e5b3a"/>
+  <rect x="150" y="72" width="40" height="42" rx="8" fill="#e3f1e7"/><rect x="156" y="79" width="28" height="20" rx="5" fill="#0f2321"/><circle cx="164" cy="89" r="3" fill="#33d1b3"/><circle cx="176" cy="89" r="3" fill="#33d1b3"/>
+</svg>`;
+$('#artTabs').innerHTML = `<svg viewBox="0 0 240 150" aria-hidden="true">
+  ${T.map((t, n) => { const a = [-21, -7, 7, 21][n]; return `<g transform="rotate(${a} 120 210)"><rect x="96" y="22" width="48" height="76" rx="8" fill="#fff" stroke="${t.c}" stroke-width="3"/><rect x="96" y="22" width="48" height="16" rx="8" fill="${t.c}"/><rect x="96" y="30" width="48" height="8" fill="${t.c}"/><g transform="translate(107 46) scale(.76)">${t.ic}</g><rect x="104" y="78" width="32" height="10" rx="5" fill="${t.c}" opacity=".85"/></g>`; }).join('')}
+</svg>`;
+/* Miniatura de la plantilla */
+(function () {
+  const s = E.SHEET; let c = '';
+  for (let r = 0; r < 8; r++) for (let k = 0; k < 8; k++) c += `<circle cx="${s.gx + (k + .5) * s.cell}" cy="${s.gy + (r + .5) * s.cell}" r="7" fill="none" stroke="#b9c8bd" stroke-width="1"/>`;
+  $('#thumbPdf').innerHTML = `<svg viewBox="0 0 ${s.w} ${s.h}" aria-hidden="true"><rect width="${s.w}" height="${s.h}" fill="#fff"/>
+    <text x="24" y="20" font-size="6" fill="#7b9a86" font-family="Poppins, sans-serif">Ecobot Cobra Vida · Taller 1</text>
+    <text x="24" y="32" font-size="10" font-weight="700" fill="#5d7f69" font-family="Poppins, sans-serif">Caras del Ecobot</text>
+    ${s.mc.map(([x, y]) => `<rect x="${x - 7}" y="${y - 7}" width="14" height="14" fill="#111"/>`).join('')}${c}</svg>`;
+})();
+const fe = faces.feliz;
+const tvEyes = [[fe.L, 78], [fe.R, 122]].map(([rows, ox]) => { let s = ''; for (let y = 0; y < 8; y++) for (let x = 0; x < 8; x++) s += `<circle cx="${ox + 2.6 + x * 5.2}" cy="${44 + 2.6 + y * 5.2}" r="2" fill="${rows[y][x] === '1' ? '#33d1b3' : '#1d3a35'}"/>`; return s; }).join('');
+$('#artTv').innerHTML = `<svg viewBox="0 0 240 150" aria-hidden="true">
+  <path d="M104 118h32l8 16h-48z" fill="#7a5d14" opacity=".55"/><rect x="80" y="132" width="80" height="6" rx="3" fill="#7a5d14" opacity=".55"/>
+  <rect x="30" y="10" width="180" height="110" rx="12" fill="#1a2a24"/>
+  <rect x="38" y="18" width="164" height="94" rx="6" fill="#0f3322"/>
+  <rect x="68" y="32" width="104" height="64" rx="14" fill="#e6f3e8" stroke="#1e5b3a" stroke-width="3"/>
+  <rect x="73" y="38" width="94" height="52" rx="9" fill="#0a1c1a"/>
+  ${tvEyes}
+  <path d="M120 32v-10M120 24c-6-8-14-6-15-3M120 24c5-9 13-8 15-5" fill="none" stroke="#5fbf5a" stroke-width="3" stroke-linecap="round"/>
+  <rect x="150" y="24" width="44" height="18" rx="9" fill="#fff"/><text x="172" y="36.5" font-size="9" font-family="Poppins, sans-serif" font-weight="800" fill="#1e5b3a" text-anchor="middle">¡Hola!</text>
+</svg>`;
+</script>
+</body>
+</html>
