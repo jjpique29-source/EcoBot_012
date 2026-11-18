@@ -8,7 +8,7 @@ const E = require('./ecobot-nucleo.js');
 const PORT = +process.env.PORT || 8080;
 const DIR = __dirname;
 const DATA = path.join(DIR, 'datos-taller.json');
-const MIME = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8', '.pdf': 'application/pdf', '.png': 'image/png', '.svg': 'image/svg+xml', '.ico': 'image/x-icon', '.txt': 'text/plain; charset=utf-8' };
+const MIME = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8', '.pdf': 'application/pdf', '.png': 'image/png', '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.webp': 'image/webp', '.svg': 'image/svg+xml', '.ico': 'image/x-icon', '.txt': 'text/plain; charset=utf-8' };
 
 let S;
 try { S = Object.assign(E.initial(), JSON.parse(fs.readFileSync(DATA, 'utf8'))); console.log('Se cargó el taller guardado en datos-taller.json'); }
