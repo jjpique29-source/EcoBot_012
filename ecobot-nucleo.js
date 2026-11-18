@@ -7,7 +7,8 @@
 const E = {};
 
 /* ---------- Modo calmado: solo si el moderador lo pide (no depende de Windows) ---------- */
-E.calm = (() => { try { return localStorage.getItem('ecobot-calma') === 'si'; } catch (e) { return false; } })();
+const storage = typeof window !== 'undefined' && window.localStorage ? window.localStorage : null;
+E.calm = (() => { try { return storage ? storage.getItem('ecobot-calma') === 'si' : false; } catch (e) { return false; } })();
 if (typeof document !== 'undefined' && E.calm) document.documentElement.classList.add('calm');
 
 /* ---------- Utilidades ---------- */
@@ -254,8 +255,8 @@ E.connect = function (onState, onStatus) {
     cur = s;
     try { onState(JSON.parse(JSON.stringify(s)), changed); } catch (e) { console.error(e); }
   }
-  const load = () => { try { const s = JSON.parse(localStorage.getItem(KEY) || 'null'); if (s && s.faces) return Object.assign(E.initial(), s); } catch (e) { } return null; };
-  const save = s => { try { localStorage.setItem(KEY, JSON.stringify(s)); } catch (e) { } };
+  const load = () => { try { const s = storage ? JSON.parse(storage.getItem(KEY) || 'null') : null; if (s && s.faces) return Object.assign(E.initial(), s); } catch (e) { } return null; };
+  const save = s => { try { if (storage) storage.setItem(KEY, JSON.stringify(s)); } catch (e) { } };
   function startLocal() {
     mode = 'local';
     let s = load(); if (!s) { s = E.initial(); save(s); }
@@ -376,8 +377,8 @@ if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
 const SWEET = /salom|dalia|paloma|elvira|helena|sabina|laura|paulina|m[oó]nica|lupe|ximena|larissa|catalina|camila|elena|abril|beatriz|candela|irene|nuria|renata|valentina|vera|marina|andrea|sof[ií]a|luc[ií]a|google español/i;
 const NATURAL = /natural|online|neural|premium|enhanced/i;
 E.spanishVoices = () => voices.filter(v => /^es/i.test(v.lang));
-E.voicePref = () => { try { return localStorage.getItem('ecobot-voz') || ''; } catch (e) { return ''; } };
-E.setVoicePref = n => { try { localStorage.setItem('ecobot-voz', n); } catch (e) { } };
+E.voicePref = () => { try { return storage ? storage.getItem('ecobot-voz') || '' : ''; } catch (e) { return ''; } };
+E.setVoicePref = n => { try { if (storage) storage.setItem('ecobot-voz', n); } catch (e) { } };
 E.voiceScore = v => (/paola/i.test(v.name) ? 20 : 0) + (NATURAL.test(v.name) ? 4 : 0) + (SWEET.test(v.name) ? 3 : 0) + (/CO$/i.test(v.lang) ? 2 : /(MX|US|419)$/i.test(v.lang) ? 1 : 0);
 E.bestVoice = () => {
   const es = E.spanishVoices(), pref = E.voicePref(), p = es.find(v => v.name === pref);
